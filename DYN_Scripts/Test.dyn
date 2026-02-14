@@ -1,0 +1,23 @@
+
+def_path Main start
+    AddData "starting test"
+    Update
+    // Var test
+    FieldCoord CoordTest1 (6,7)
+    FieldCoord CoordTest1 (6,9)
+
+    FieldPos PosTest1 (4,2,3)
+    FieldPos PosTest2 (2,3,4)
+
+    Num SumTest 0
+    Num MinTest 0
+    Num MuxTest 0
+    Num DivTest 0
+    Num PowTest 0
+    Num SqrTest 0
+    Num SinTest 0
+    Num IsnTest 0
+    Num CosTest 0
+    Num IcsTest 0
+    Num TanTest 0
+    Num ItnTest 0
