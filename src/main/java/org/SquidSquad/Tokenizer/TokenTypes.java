@@ -4,11 +4,13 @@ package org.SquidSquad.Tokenizer;
 public enum TokenTypes {
     // single char tokens
     Lparenth, Rparenth, Comma,
+    Lbraket, Rbraket,
     // math commands
     Add,Sub,Mux,Div,
     Pow,Sqrt,Sin,iSin,
     Cos,iCos,Tan,iTan,
     toRad,toDeg,
+    Increment, Decrement,
     // variables
     Number,Bool,String,
     List,Json,FieldCord,
@@ -19,7 +21,7 @@ public enum TokenTypes {
     // func/loop/if
     DefPath,Run,While,For,
     // telemetry
-    AddData,Update,
+    AddData,Update,Clear,
     // literals
     Literal, Name,
     // extra

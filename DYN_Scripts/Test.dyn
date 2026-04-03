@@ -1,23 +1,162 @@
-
+// note: this language is linebreak dependent, not indent dependent.
 def_path Main start
+    // run tests
     AddData "starting test"
     Update
-    // Var test
-    FieldCoord CoordTest1 (6,7)
-    FieldCoord CoordTest1 (6,9)
+    AddData "calculating math function test"
+    Update
+    RUN MathTest
 
-    FieldPos PosTest1 (4,2,3)
-    FieldPos PosTest2 (2,3,4)
+    AddData "gathering loop test data"
+    Update
+    RUN LoopTest
 
-    Num SumTest 0
-    Num MinTest 0
-    Num MuxTest 0
-    Num DivTest 0
-    Num PowTest 0
-    Num SqrTest 0
-    Num SinTest 0
-    Num IsnTest 0
-    Num CosTest 0
-    Num IcsTest 0
-    Num TanTest 0
-    Num ItnTest 0
+    AddData "ensuring variable set existence and versatility"
+    Update
+    RUN VarTest
+
+    AddData "ensuring proper rng data distribution"
+    Update
+    RUN RngTest
+    // verify results
+    Clear
+    AddData "verifying test results"
+    Update
+    RUN VerifyResults
+end
+def_path MathTest start // chatgpt got me the test values (if you couldn't tell)
+    Num SumTest0 2.0
+    Num SumTest1 30.0
+    Num SumTest
+
+    ADD SumTest0 SumTest1 to SumTest
+    ADD SumTest0 SumTest1
+    ADD SumTest1 3.0
+
+    Num MinTest0 6.0
+    Num MinTest1 7.0
+    Num MinTest
+
+    SUB MinTest0 MinTest1 to MinTest
+    SUB MinTest0 MinTest1
+    SUB MinTest1 3.0
+
+    Num MuxTest0 6.0
+    Num MuxTest1 9.0
+    Num MuxTest
+
+    MUX MuxTest0 MuxTest1 to MuxTest
+    MUX MuxTest0 MuxTest1
+    MUX MuxTest1 3.0
+
+    Num DivTest0 9.0
+    Num DivTest1 8.0
+    Num DivTest
+
+    DIV DivTest0 DivTest1 to DivTest
+    DIV DivTest0 DivTest1
+    DIV DivTest1 3.0
+
+    Num PowTest0 12.0
+    Num PowTest1 2.0
+    Num PowTest
+
+    POW PowTest0 PowTest1 to PowTest
+    POW PowTest0 PowTest1
+    POW PowTest1 3.0
+
+    Num SqrTest0 25.0
+    Num SqrTest1 49.0
+    Num SqrTest
+
+    SQR SqrTest0 to SqrTest
+    SQR 3.0 to SqrTest0
+    SQR SqrTest1
+
+    // --- SIN (radians, includes periodic + general) ---
+    Num SinTest0 6.283185307179586
+    Num SinTest1 1.5707963267948966
+    Num SinTest
+
+    SIN SinTest0 to SinTest
+    SIN 3.141592653589793 to SinTest0
+    SIN SinTest1
+
+    // --- invSIN (domain [-1,1]) ---
+    Num IsnTest0 0.5
+    Num IsnTest1 -0.999999999999
+    Num IsnTest
+
+    invSIN IsnTest0 to IsnTest
+    invSIN 0.0 to IsnTest0
+    invSIN IsnTest1
+
+    // --- COS ---
+    Num CosTest0 0.123456789
+    Num CosTest1 3.141592653589793
+    Num CosTest
+
+    COS CosTest0 to CosTest
+    COS 1.5707963267948966 to CosTest0
+    COS CosTest1
+
+    // --- invCOS (domain [-1,1]) ---
+    Num IcsTest0 0.5
+    Num IcsTest1 -1.0
+    Num IcsTest
+
+    invCOS IcsTest0 to IcsTest
+    invCOS 0.0 to IcsTest0
+    invCOS IcsTest1
+
+    // --- TAN (includes discontinuity proximity) ---
+    Num TanTest0 1.5707953267948966
+    Num TanTest1 0.7853981633974483
+    Num TanTest
+
+    TAN TanTest0 to TanTest
+    TAN 0.0 to TanTest0
+    TAN TanTest1
+
+    // --- invTAN (all real inputs valid) ---
+    Num ItnTest0 1000000000.0
+    Num ItnTest1 -1.0
+    Num ItnTest
+
+    invTAN ItnTest0 to ItnTest
+    invTAN 0.0 to ItnTest0
+    invTAN ItnTest1
+end
+
+def_path LoopTest start
+    // test for loop
+    // test while loop
+end
+
+def_path VarTypeTest start
+    // test bool
+    Bool T
+    Bool F (Not T)
+    Num counter
+    If (T) start
+        Inc counter
+    end
+    If (
+    // test string
+    // test list
+    // test json
+end
+
+def_path RngTest start
+    Num trials 1000
+end
+
+def_path verifyResults start
+    // ### NUMBERS ###
+    //add
+    //sub
+    //div
+    // penis
+end
+
+autoPath Main

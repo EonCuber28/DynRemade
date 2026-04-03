@@ -1,0 +1,316 @@
+//this document assumes that you know basic python, lua, and java syntax and variables to a minimal extent.
+
+// this programming lang has the following groups of commands
+// Basic variables, and ones for FTC autos.
+// Mathematical operations
+// FTC movement commands
+// Starting/Ending declarations
+// loop declarators
+// auto function declarators
+
+'''
+NOTES
+    Functions and definitions with commas need to have a space after each comma, like so:
+        List lis [2, 4, w, 4, s, 6, 7]
+
+VARIABLE DEFINITION/CREATION CREATION:
+    FieldCoord:
+        Syntax:
+            FieldCoord name (6, 7)          there is no default position of the coord or pos variables, they must be given a value
+        Usage:
+            'name' is the name given to the variable
+            and (x,y) is the defined position when making the variable
+            if the name is alredy defined, it will be updated to the new given value.
+    FieldPos:
+        Syntax:
+            FieldPos name (6, 7, 9)
+        Usage:
+            'name' is the name of the variable
+            x and y are the coordinates of the position.
+            and h is the heading where 0 or 360 is facing towards the obelisk
+            Note: DYN field positions map 1:1 to PedroPathing coordinates (x, y, heading). In code, `FieldPose` stores x and y in inches and heading in radians and is passed directly to PedroPathing.
+    Num:
+        Syntax:
+            Num name value
+            Num name            this leaves the number with a value of 0
+            Inc name            Increments the name value by 1
+            Dec name            Decrements the name value by 1
+        usage:
+            name is the name of the variable.
+            the value follows the same rules as a java double.   (woah!)
+    Bool:
+        Syntax:
+            Bool name (A 'logicOp' B)
+            Bool name true/false
+            Bool name               this leaves the boolean with a value of true
+        Usage:
+            how do you not know what this is. its either true or false.
+            how much simpler could it be?
+    String:
+        Syntax:
+            String name "tee hee"
+            String name               this leaves it with a completely empty string
+        Usage:
+            anything between the the DOUBLE QUOTES will be part of the strings contents.
+            if any variable is placed in here
+    List:
+        Syntax:
+            List name ["6", 7, ... [6, 9]]
+            List name                     this leaves it with a list with no values
+        Usage:
+            may contain any assortment of different variables.
+            may be as long as you want.
+            has the functions: .get(index), .insert(index, data), .append(data) and .remove(index)
+    Json:
+        Syntax:
+            Json name {"6":7, 6:"7", six:seven, ...}
+            Json name                                 this leaves it with a json with no key-value pairs
+        Usage:
+            as said many times before, the name is the name of the variable.
+            works just like normal json. to get a value with an id use the .id(id) method to
+MATH OPERATIONS:
+    ADD:
+        Syntax:
+            ADD val1 val2 to var
+            ADD val1 val2        // adds together and sets val1 to the sum, if val1 is a raw number, then set it to val2 instead, if both are raw numbers then if there is no target output, throw an error
+        Usage:
+            var is where the calculation is outputed
+            val1 and val2 are the inputs to the operation.
+    SUB:
+        Syntax:
+            SUB val1 val2 to var
+            SUB val1 val2        // behaves the same as the ADD function
+        Usage:
+            var is where the calculation is outputed
+            val1 and val2 are the inputs to the operation.
+    MUX:
+        Syntax:
+            MUX val1 val2 to var
+            MUX val1 val2        // behaves the same as ADD
+        Usage:
+            var is where the calculation is outputed
+            val1 and val2 are the inputs to the operation.
+    DIV:
+        Syntax:
+            DIV val1 val2 to var
+            DIV val1 val2        // behaves the same as ADD
+        Usage:
+            var is where the calculation is outputed
+            val1 and val2 are the inputs to the operation.
+    POW:
+        Syntax:
+            POW val1 val2 to var
+            POW val1 val2        // behaves the same as ADD
+        Usage:
+            var is where the calculation is outputed
+            val1 and val2 are the inputs to the operation.
+    SQR:
+        Syntax:
+            SQR val to var
+            SQR val         // sets val to the resut of the calculation, if val is a raw number, and there is no output variable, throw a error.
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    SIN:
+        Syntax:
+            SIN val to var
+            SIN val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    invSIN:
+        Syntax:
+            invSIN val to var
+            invSIN val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    COS:
+        Syntax:
+            COS val to var
+            COS val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    invCOS:
+        Syntax:
+            invCOS val to var
+            invCOS val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    TAN:
+        Syntax:
+            TAN val to var
+            TAN val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+    invTAN:
+        Syntax:
+            invTAN val to var
+            invTAN val        // behaves the same as SQR
+        Usage:
+            val is the inputed value
+            var is where the ouput goes.
+LOGICAL OPERATORS:
+    Not:
+        Syntax:
+            Bool A (Not B)
+        Usage:
+            it inverts the boolean value that is directly in front of it.
+            then just condenses down into one boolean value.
+    And:
+        Syntax:
+            Bool A (B And C)
+        Usage:
+            You gotta be stupid *And* pretty full of yourself in order to not know
+            what the hell this is.
+    Or:
+        Syntax:    \/---you gotta put ts in parenthesis
+            Bool A (B Or C)
+        Usage:
+            This system is designed to yell (in the most GP way possible) at you
+            when you dont follow the rule i set forth upon this lang.
+    If:
+        Syntax:
+            If (bool) start
+            If (bool Or bool0) start
+            If (bool And bool0) start
+            If (bool Or (bool0 And bool1)...) start
+            If (num0 >= num1) start                  *    *    *
+            If (num0 <= num1) start
+            If (var0 == var1) start
+            If (bool == (num >= num0)) start
+                        *
+
+                        *
+
+                        *
+        Usage:
+            "y'know python? y'know java? yea? it's literaly the same. except autistic as fuck! basicaly better!"
+            (seriously tho, its just the same as everyone elses logic system)
+BASIC MOVEMENT COMMANDS:
+    turnTo:
+        syntax:
+            turnTo(headingInDegree, deg/s)
+        args:
+            headingInDegree:
+                this is the heading angle that we want to end with after the
+            deg/s:
+                this argument defines how fast to turn th robot in degrees per second
+    goTo:
+        syntax:
+            goTo(field coordinate/position)
+        args:
+            field coordinate/position:
+                this argument tells the auto to go to the given point in a straight line
+    followBezier:
+        syntax:
+            followBezier (midPose/Cord... ,endPos)
+        args:
+            midPos/Cord:
+                these args define all of the weight points in the bezier curve from start to finish.
+            endPos:
+                this defines where the bot should end after the bezier curve.
+STARTING DECLARATIONS:
+    PathStartPosition:
+        Syntax:
+            PathStartPosition = pos
+        Usage:
+            pos = a position on the field, this defines where the robot starts in the auto sequence.
+            This command must be states before ANY movement commands can be executed.
+            Your script will crash if a movement command is executed before this is defined.
+ENDING DECLARATIONS:
+    autoPath:
+        Syntax:
+            autoPath pathName
+        Usage:
+            pathName is the name of the path function that will be ran when this config is used
+            if it is not defined, it WILL default to the first defined auto path in your script.
+LOOPS:
+    while:
+        syntax:
+            while Bool start ... end
+        usage:
+            the code in the while loop will be ran until the given Bool becomes false
+    for:
+        syntax:
+            for number/list as value start ... end
+        Usage:
+            the number MUST be a whole number with no decimals, and the value will be set to the current loop count.
+            the list will be processed element by element and the value will be set to the current element
+PATH DECLARATORS:
+    def_path:
+        syntax:
+            def_path main start ... end
+        Usage:
+            main = the name of the function, will throw a fit if the name is already used as a function name beforehand in the script
+            between the start and end lines put the code you want to run during auto.
+    RUN:
+        Syntax:
+            RUN pathFunctionName
+        Usage:
+            runs the given function name.
+TELEMETRY:
+    AddData:
+        syntax:
+            AddData var
+        Usage:
+            the var is any variable, its data will be added to telemetry output the next time it is updated. and will be added to the telemetry message buffer.
+            I (the current soul developer) Isaac Clark of FTC team 17153 and 32165 recommend that you use a string
+            If the variable is NOT a string, it will be formatted in the following fashion: "Var_name: value".
+            The message will be truncated if it is longer than what the driver station telemetry comms can handle.
+    Update:
+        syntax:
+            Update
+        Usage:
+            sends the current telemetry buffer to the driver station.
+            does not clear the telemetry buffer.
+    Clear:
+        syntax:
+            Clear
+        Usage:
+            clears the current telemetry buffer
+JAVA METHOD INTEGRATION:
+    jFunc:
+        syntax:
+            jFunc funcID
+            jFunc funcID valIN
+            jFunc funcID to valOUT
+            jFunc funcID valIN to valOUT
+        Usage:
+            the functions that are given to DYN, must only have inputs and outputs as DynVars, either as DynVar or as DynVar[].
+            this can be used to get input from an op (for testing), get the angle of a servo, state of a subsystem, the current position etc.
+RANDOM: (why not)
+    RngFlt:
+        Syntax:
+            RngFlt var
+        Usage:
+            sets (if the variable is not yet defined, it will be after this operation) var to a random float value (-1 inclusive, 1 inclusive).
+    RngDub:
+        Syntax:
+            RngDub min max to var
+        Usage:
+            sets (if the variable is not yet defined, it will be after this operation) var to a random double value within the min and max (both are inclusive).
+    RngInt:
+        Syntax:
+            RngInt min max to var
+        Usage:
+            sets (if the variable is not yet defined, it will be after this operation) var to a random integer value within the min and max (both are inclusive).
+            if min has decimals, it will be treated as if they were truncated.
+            if max has decimals, it will be treated as if they were truncated.
+    RngBool:
+        Syntax:
+            RngBool Var
+        Usage:
+            sets (if the variable is not yet defined, it will be after this operation) var to a random boolean value (true, or false).
+
+'''
+
+
+def_path Main start
+    AddData "DYN Language System Test Starting!"
+end
+
+autoPath Main

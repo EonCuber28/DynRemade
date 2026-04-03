@@ -1,0 +1,57 @@
+#!/bin/bash
+
+DEBUG=false
+if [[ "$1" == "--debug" ]]; then
+    DEBUG=true
+fi
+
+echo "BUILDING"
+./gradlew jar || exit 1
+sleep 1
+clear
+echo "RUNNING"
+sleep 0.5
+
+if $DEBUG; then
+    java -verbose:gc -Xlog:gc*:file=/tmp/gc.log -jar "build/libs/DYN_decoded-0.1-PRE-ALPHA.jar" < /dev/tty &
+else
+    java -jar "build/libs/DYN_decoded-0.1-PRE-ALPHA.jar" < /dev/tty &
+fi
+
+APP_PID=$!
+CORES=$(nproc)
+
+MAX_CPU=0
+AVG_CPU=0
+MAX_MEM=0
+AVG_MEM=0
+MAX_THREADS=0
+SAMPLES=0
+
+while kill -0 $APP_PID 2>/dev/null; do
+    CPU=$(ps -p $APP_PID -o %cpu= 2>/dev/null | tr -d ' ')
+    MEM=$(ps -p $APP_PID -o rss= 2>/dev/null | tr -d ' ')
+    THREADS=$(ps -p $APP_PID -o nlwp= 2>/dev/null | tr -d ' ')
+
+    if [[ -n "$CPU" && -n "$MEM" && -n "$THREADS" ]]; then
+        MAX_CPU=$(echo "$CPU $MAX_CPU" | awk '{print ($1>$2)?$1:$2}')
+        MAX_MEM=$(echo "$MEM $MAX_MEM" | awk '{print ($1>$2)?$1:$2}')
+        MAX_THREADS=$(echo "$THREADS $MAX_THREADS" | awk '{print ($1>$2)?$1:$2}')
+        AVG_CPU=$(echo "$AVG_CPU $CPU $SAMPLES" | awk '{print ($1*$3+$2)/($3+1)}')
+        AVG_MEM=$(echo "$AVG_MEM $MEM $SAMPLES" | awk '{print ($1*$3+$2)/($3+1)}')
+        SAMPLES=$((SAMPLES+1))
+    fi
+
+    sleep 0.5
+done
+
+wait $APP_PID
+
+echo ""
+echo "===== STATS ====="
+echo "Max CPU:      $(echo $MAX_CPU $CORES | awk '{printf "%.1f", $1/$2}')%"
+echo "Avg CPU:      $(echo $AVG_CPU $CORES | awk '{printf "%.1f", $1/$2}')%"
+echo "Max Memory:   $(echo $MAX_MEM | awk '{printf "%.1f", $1/1024}') MB"
+echo "Avg Memory:   $(echo $AVG_MEM | awk '{printf "%.1f", $1/1024}') MB"
+echo "Max Threads:  ${MAX_THREADS}"
+echo "================="
