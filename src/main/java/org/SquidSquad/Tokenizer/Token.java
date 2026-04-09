@@ -4,6 +4,7 @@ public class Token {
     private TokenTypes type;
     private Object value;
     private int line;
+    private int col;
 
     public TokenTypes type(){
         return type;
@@ -16,17 +17,19 @@ public class Token {
         return value;
     }
 
-    public Token(TokenTypes type,int line){
+    public Token(TokenTypes type,int line,int col){
         this.type = type;
         this.line = line;
+        this.col = col;
     }
-    public Token(TokenTypes type,int line,Object value){
+    public Token(TokenTypes type,int line,int col,Object value){
         this.type = type;
         this.line = line;
+        this.col = col;
         this.value = value;
     }
     public String toString(){
-        // "[Line X; toeknType; value]"
+        // "[Line,char X,Y; toeknType; value]"
         String tokenType = "";
         switch (type){
             // single chars
@@ -34,8 +37,11 @@ public class Token {
             case Rparenth -> tokenType = "Right Parenthesis";
             case Comma -> tokenType = "Comma";
 
-            case Lbraket -> tokenType = "Left Curly Bracket";
-            case Rbraket -> tokenType = "Right Curly Bracket";
+            case Lbraket -> tokenType = "Left Bracket";
+            case Rbraket -> tokenType = "Right Bracket";
+
+            case LCbraket -> tokenType = "Left Curly Bracket";
+            case RCbraket ->  tokenType = "Right Curly Bracket";
 
             // math ops
             case Add -> tokenType = "Add";
@@ -85,6 +91,7 @@ public class Token {
             case Run -> tokenType = "Run"; // run target path function
             case While -> tokenType = "While Loop";
             case For -> tokenType = "For Loop";
+            case If -> tokenType = "If Statement";
 
             // telem
             case AddData -> tokenType = "Add Telemetry Data";
@@ -95,14 +102,24 @@ public class Token {
             case Literal -> tokenType = "Literal"; // variable value, etc.
             case Name -> tokenType = "Name"; // name of variable, or path func
 
+            // random commands
+            case RngFloat -> tokenType = "Random Float";
+            case RngDouble -> tokenType = "Random Double";
+
+            case RngInteger -> tokenType = "Random Integer";
+            case RngBoolean -> tokenType = "Random Boolean";
+
             // extra
             case Start -> tokenType = "Start"; // start path func, or loop
             case End -> tokenType = "End"; // end of path func, or loop
             case PathStartPos -> tokenType = "Path Start Position";
+
             case Cmd -> tokenType = "Execute Command"; // execute java defined command, can take N values, and can return 1 value.
             case To -> tokenType = "To"; // this is like a output variable pointer thingy, it tells where to specifically send the operation output to. ex: Add Var1 Var2 *TO* Var3
+            case MainPathFunc -> tokenType = "Main Path Function";
+
             default -> tokenType = "null (BAD)";
         }
-        return "[Line "+line+"; "+tokenType+"; "+value+"]";
+        return "[Line,Char "+line+","+col+"; "+tokenType+"; "+value+"]";
     }
 }

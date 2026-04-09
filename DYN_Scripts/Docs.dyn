@@ -12,7 +12,7 @@
 NOTES
     Functions and definitions with commas need to have a space after each comma, like so:
         List lis [2, 4, w, 4, s, 6, 7]
-
+    Lists, and Json, cannot be spread over multiple lines (for now, i wanna make it simple for now, then expand versatility later).
 VARIABLE DEFINITION/CREATION CREATION:
     FieldCoord:
         Syntax:
@@ -182,11 +182,11 @@ LOGICAL OPERATORS:
             If (num0 <= num1) start
             If (var0 == var1) start
             If (bool == (num >= num0)) start
-                        *
+                        *                            *
 
-                        *
+                        *                                 *
 
-                        *
+                        *                                      *
         Usage:
             "y'know python? y'know java? yea? it's literaly the same. except autistic as fuck! basicaly better!"
             (seriously tho, its just the same as everyone elses logic system)
@@ -288,7 +288,7 @@ RANDOM: (why not)
             RngFlt var
         Usage:
             sets (if the variable is not yet defined, it will be after this operation) var to a random float value (-1 inclusive, 1 inclusive).
-    RngDub:
+    RngDbl:
         Syntax:
             RngDub min max to var
         Usage:
@@ -310,7 +310,6 @@ RANDOM: (why not)
 
 
 def_path Main start
-    AddData "DYN Language System Test Starting!"
 end
 
 autoPath Main

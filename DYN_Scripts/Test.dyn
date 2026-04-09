@@ -141,7 +141,7 @@ def_path VarTypeTest start
     If (T) start
         Inc counter
     end
-    If (
+    If ()
     // test string
     // test list
     // test json

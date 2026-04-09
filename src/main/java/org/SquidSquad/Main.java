@@ -17,8 +17,8 @@ public class Main {
         // we now testing the file reader
 
         // startup the scanner
-        print("Path to scrips (leave empty for default): ");
-        String response = scanner.nextLine();
+        //print("Path to scrips (leave empty for default): ");
+        String response = "";//scanner.nextLine();
         if (response != null) {
             if (!response.isEmpty()) {
                 fr = new FileReader(response);
@@ -30,8 +30,8 @@ public class Main {
         }
 
         // select the file, and start parsing
-        print("script name (leave empty for default): ");
-        response = scanner.nextLine();
+        //print("script name (leave empty for default): ");
+        response = "";//scanner.nextLine();
         if (response != null){
             if (!response.isEmpty()){
                 ScriptContents = fr.readFile(response);
@@ -46,7 +46,7 @@ public class Main {
         // test tokenizer
         tk = new Tokenizer();
         Token[] tokens = tk.processScript(ScriptContents);
-
+        for(Token tk : tokens) println(tk.toString());
         scanner.close();
     }
     private static void println(Object toBePrinted){
