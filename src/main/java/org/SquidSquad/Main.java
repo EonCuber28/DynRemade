@@ -18,7 +18,7 @@ public class Main {
 
         // startup the scanner
         //print("Path to scrips (leave empty for default): ");
-        String response = "";//scanner.nextLine();
+        String response = scanner.nextLine();
         if (response != null) {
             if (!response.isEmpty()) {
                 fr = new FileReader(response);

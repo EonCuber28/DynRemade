@@ -4,17 +4,17 @@ import org.SquidSquad.CommandSequencer.VariableManager;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 
 public class Command {
-    private VariableManager varManager;
+    protected VariableManager varManager;
     private Variable getVar(String ID){
         return varManager.getVar(ID);
     }
 
-    private String[] InVarIDs;
-    private String OutVarID;
+    protected String[] InVarIDs;
+    protected String OutVarID;
 
     private CommandType type;
 
-    private int line;
+    protected int line;
 
     public Command(int line, CommandType type, String[] InVarIDs, String OutVarID){}
     public Command(int line, CommandType type, String[] InVarIDs){}

@@ -1,5 +1,8 @@
 package org.SquidSquad.CommandSequencer.Variables;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 public class Variable {
     private VariableTypes type;
     private Object value;
@@ -83,4 +86,41 @@ public class Variable {
     public boolean and(Variable in){return false;}
     public boolean or(Variable in){return false;}
     public boolean not(){return false;}
+
+    public boolean lessThan(Variable in){return false;}
+    public boolean moreThan(Variable in){return false;}
+
+    public void setVariable(Variable value){
+        this.type = value.getType();
+        this.value = value.getValue();
+    }
+    public void setValue(ArrayList<Variable> in){
+        this.type = VariableTypes.List;
+        this.value = in;
+    }
+    public void setValue(Map<Variable,Variable> in){
+        this.type = VariableTypes.Json;
+        this.value = in;
+    }
+    public void setValue(String in){
+        this.type = VariableTypes.String;
+        this.value = in;
+    }
+    public void setValue(boolean in){
+        this.type = VariableTypes.Boolean;
+        this.value = in;
+    }
+    public void setValue(double in){
+        this.type = VariableTypes.Number;
+        this.value = in;
+    }
+    public void setValue(double[] in){
+        if (in.length == 2) {
+            this.type = VariableTypes.FieldCord;
+            this.value = in;
+        } else if (in.length == 3){
+            this.type = VariableTypes.FieldPos;
+            this.value = in;
+        }
+    }
 }

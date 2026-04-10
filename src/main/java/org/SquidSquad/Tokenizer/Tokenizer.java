@@ -111,7 +111,6 @@ public class Tokenizer {
                 // tokenization process start
                 Token[] processedChunk = processChunk(chunk, lineIndex,charIndex);
                 for (Token token : processedChunk){
-                    System.out.print(token);
                     tokens.add(token);
                 }
                 // tokenization process end

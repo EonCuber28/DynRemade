@@ -1,10 +1,57 @@
 package org.SquidSquad.CommandSequencer.Commands.variables;
 
 import org.SquidSquad.CommandSequencer.Commands.Command;
+import org.SquidSquad.CommandSequencer.Commands.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
+import org.SquidSquad.CommandSequencer.Variables.Variable;
+import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 public class SetVar extends Command {
-    public SetVar(int line){
-        super(line, CommandType.SetVar,new String[0],"");
+    private Object value;
+    private VariableTypes valueType;
+    public SetVar(int line, String target, String value, boolean isVar){
+        super(line, CommandType.SetVar,new String[]{target});
+        if (isVar) {
+            super.OutVarID = value;
+            valueType = null;
+        } else {
+            this.value = value;
+            valueType = VariableTypes.String;
+        }
+    }
+    public SetVar(int line, String target, Map<Variable,Variable> value){
+        super(line, CommandType.SetVar,new String[]{target});
+        valueType = VariableTypes.Json;
+        this.value = value;
+    }
+    public SetVar(int line, String target, ArrayList<Variable> value){
+        super(line, CommandType.SetVar,new String[]{target});
+        valueType = VariableTypes.List;
+        this.value = value;
+    }
+    public SetVar(int line, String target, boolean value){
+        super(line, CommandType.SetVar,new String[]{target});
+        valueType = VariableTypes.Boolean;
+        this.value = value;
+    }
+    public SetVar(int line, String target, double value){
+        super(line, CommandType.SetVar,new String[]{target});
+        valueType = VariableTypes.Number;
+        this.value = value;
+    }
+    public SetVar(int line, String target, double[] value){
+        super(line, CommandType.SetVar,new String[]{target});
+        if (value.length == 3) valueType = VariableTypes.FieldPos;
+        else if (value.length == 2) valueType = VariableTypes.FieldCord;
+        else throw new CommandException(super.line,"SetVar","cannot set variable to FieldPos/Cord with invalid params");
+        this.value = value;
+    }
+
+    @Override
+    public void run(){
+
     }
 }
