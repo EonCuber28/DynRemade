@@ -52,6 +52,9 @@ public class SetVar extends Command {
 
     @Override
     public void run(){
-
+        // construct new var
+        Variable newbie = new Variable(valueType, value);
+        // apply
+        varManager.getVar(InVarIDs[0]).setVariable(newbie);
     }
 }

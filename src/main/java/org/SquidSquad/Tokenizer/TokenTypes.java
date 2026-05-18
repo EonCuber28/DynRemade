@@ -16,6 +16,9 @@ public enum TokenTypes {
     Number,Bool,String,
     List,Json,FieldCord,
     FieldPos,
+    // list/json Ops
+    Get,Insert,Append,
+    Remove,Set,
     // logical Ops
     Equals,NotEqual,isMore,
     isLess,And,Or,Not,

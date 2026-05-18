@@ -3,7 +3,80 @@ package org.SquidSquad.CommandSequencer.Commands;
 import org.SquidSquad.CommandSequencer.VariableManager;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 
+import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 public class Command {
+    protected static boolean canBez;
+    protected static boolean canSpline;
+    protected static boolean isLinearFollower;
+    protected static Consumer<double[][]> doSpline;
+    protected static Consumer<double[][]> doBez;
+    protected static Consumer<double[][]> moveTo;       // required
+    protected static Consumer<Double> turnTo;         // required
+    protected static Supplier<Boolean> isBotIdle;
+    protected static Supplier<double[]> getRobotPose; // required
+    protected static Runnable runUpdate;
+    protected static Runnable updateFollower;
+    protected static Runnable isOpModeRunning; // needed for ensuring we stop non-linear move commands when op mode is stopped
+    public void registerUpdaters(Runnable updateLoop, Runnable isOpModeRunning){
+        runUpdate = updateLoop;
+        Command.isOpModeRunning = isOpModeRunning;
+    }
+    public void registerUpdaters(Runnable updateLoop, Runnable isOpModeRunning, Runnable updateFollower){
+        runUpdate = updateLoop;
+        Command.isOpModeRunning = isOpModeRunning;
+        Command.updateFollower = updateFollower;
+    }
+    public void registerFollower(Supplier<Boolean> isBotIdle, Supplier<double[]> getRobotPose, Consumer<double[][]> moveTo, Consumer<Double> turnTo){
+        canBez = false; canSpline = false;
+        isLinearFollower = false;
+
+        Command.moveTo = moveTo;
+        Command.turnTo = turnTo;
+        Command.isBotIdle = isBotIdle;
+        Command.getRobotPose = getRobotPose;
+    }
+    public void registerFollower(Supplier<Boolean> isBotIdle, Supplier<double[]> getRobotPose, Consumer<double[][]> moveTo, Consumer<Double> turnTo, Consumer<double[][]> doCurve, boolean usesSpline){
+        canBez = !usesSpline;
+        canSpline = !canBez;
+        isLinearFollower = false;
+
+        Command.moveTo = moveTo;
+        Command.turnTo = turnTo;
+        Command.isBotIdle = isBotIdle;
+        Command.getRobotPose = getRobotPose;
+
+        if (canBez) Command.doBez = doCurve;
+        else Command.doSpline = doCurve;
+    }
+    public void registerFollower(Consumer<double[][]> moveTo, Supplier<double[]> getRobotPose, Consumer<Double> turnTo){
+        canBez = false; canSpline = false;
+        isLinearFollower = true;
+
+        Command.moveTo = moveTo;
+        Command.turnTo = turnTo;
+        Command.getRobotPose = getRobotPose;
+    }
+    public void registerFollower(Consumer<double[][]> moveTo, Supplier<double[]> getRobotPose, Consumer<Double> turnTo, Consumer<double[][]> doCurve, boolean usesSpline){
+        canBez = !usesSpline;
+        canSpline = !canBez;
+        isLinearFollower = true;
+
+        Command.moveTo = moveTo;
+        Command.turnTo = turnTo;
+        Command.getRobotPose = getRobotPose;
+
+        if (canBez) Command.doBez = doCurve;
+        else Command.doSpline = doCurve;
+    }
+
+    protected static ArrayList<String> telemBuffer = new ArrayList<>();
+    protected static Consumer<String> runDynPath;
+    public void registerDynPathRunner(Consumer<String> runner){
+        runDynPath = runner;
+    }
     protected VariableManager varManager;
     private Variable getVar(String ID){
         return varManager.getVar(ID);
@@ -16,9 +89,24 @@ public class Command {
 
     protected int line;
 
-    public Command(int line, CommandType type, String[] InVarIDs, String OutVarID){}
-    public Command(int line, CommandType type, String[] InVarIDs){}
-    public Command(int line, CommandType type, String OutVarID){}
+    public Command(int line, CommandType type, String[] InVarIDs, String OutVarID){
+        this.line = line;
+        this.type = type;
+        this.InVarIDs = InVarIDs;
+        this.OutVarID = OutVarID;
+    }
+    public Command(int line, CommandType type, String[] InVarIDs){
+        this.line = line;
+        this.type = type;
+        this.InVarIDs = InVarIDs;
+        this.OutVarID = "";
+    }
+    public Command(int line, CommandType type, String OutVarID){
+        this.line = line;
+        this.type = type;
+        this.InVarIDs = new String[]{};
+        this.OutVarID = OutVarID;
+    }
 
     public void run(){}
 
@@ -66,7 +154,7 @@ public class Command {
             case Sqrt -> commandType = "Sqrt";
             case Sub -> commandType = "Sub";
 
-            case Bezier -> commandType = "Bezier";
+            case SplineTo -> commandType = "Bezier";
             case GoTo -> commandType = "GoTo";
             case TurnTo -> commandType = "TurnTo";
 

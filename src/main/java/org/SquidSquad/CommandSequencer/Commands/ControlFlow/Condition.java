@@ -9,6 +9,7 @@ public class Condition {
         And,Or,           // both parts are Conditions
         Equals,NotEquals, // both parts are Conditions/booleans
         MoreThan,LessThan,// both parts are Variable Number
+        MoreThanEq,LessThanEq,
         Constant}         // in1 is used as this value
     private ConditionType type;
 
@@ -23,11 +24,13 @@ public class Condition {
         switch (condition){
             case "And" -> type = ConditionType.And;
             case "Or" -> type = ConditionType.Or;
-            case "Equals" -> type = ConditionType.Equals;
-            case "NotEquals" -> type = ConditionType.NotEquals;
-            case "MoreThan" -> type = ConditionType.MoreThan;
-            case "LessThan" -> type = ConditionType.LessThan;
-            case "Constant" -> type = ConditionType.Constant;
+            case "Equals","==" -> type = ConditionType.Equals;
+            case "NotEquals","!=" -> type = ConditionType.NotEquals;
+            case "MoreThan",">" -> type = ConditionType.MoreThan;
+            case "LessThan","<" -> type = ConditionType.LessThan;
+            case "MoreThanEq",">=" -> type = ConditionType.MoreThanEq;
+            case "LessThanEq","<=" -> type = ConditionType.LessThanEq;
+            case "Constant","Const" -> type = ConditionType.Constant;
             default -> type = null;
         }
     }
@@ -121,9 +124,19 @@ public class Condition {
         setCondition("Constant");
     }
     // process parts
-    public boolean getResult(){ // i know for a FACT that there is going to be issues in this
+    public boolean getResult(){ // i know for a FACT that there is going to be issues in this (like forgetting about >= and <= stuff :)
         Boolean result = null;
         switch (type){
+            case LessThanEq -> {
+                if (Part1Type == InTypes.var && Part2Type == InTypes.var){
+                    result = varMan.getVar((String)Part1).lessThanEq(varMan.getVar((String) Part2));
+                }
+            }
+            case MoreThanEq -> {
+                if (Part1Type == InTypes.var && Part2Type == InTypes.var){
+                    result = varMan.getVar((String)Part1).moreThanEq(varMan.getVar((String) Part2));
+                }
+            }
             case Or -> {
                 switch (Part1Type){
                     case var -> {

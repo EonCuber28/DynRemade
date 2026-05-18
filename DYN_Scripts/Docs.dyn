@@ -1,4 +1,6 @@
-//this document assumes that you know basic python, lua, and java syntax and variables to a minimal extent.
+// imma call this file "Tina", cus it fat as fu-
+
+//this document assumes that you know basic python(variable versatility), lua(its structure), and java(methodology) and variables to a minimal extent.
 
 // this programming lang has the following groups of commands
 // Basic variables, and ones for FTC autos.
@@ -17,13 +19,15 @@ VARIABLE DEFINITION/CREATION CREATION:
     FieldCoord:
         Syntax:
             FieldCoord name (6, 7)          there is no default position of the coord or pos variables, they must be given a value
+            FieldCoord name (A, B)          A and B are variables that you can modify seperately that will affect the values asigned to this
         Usage:
             'name' is the name given to the variable
             and (x,y) is the defined position when making the variable
             if the name is alredy defined, it will be updated to the new given value.
     FieldPos:
         Syntax:
-            FieldPos name (6, 7, 9)
+            FieldPos name (6, 7, 9)         Field Poses do not have
+            FieldPos name (A, B, C)         A, B, and C are variables that you can modify seperately that will affect the values asigned to this
         Usage:
             'name' is the name of the variable
             x and y are the coordinates of the position.
@@ -60,21 +64,55 @@ VARIABLE DEFINITION/CREATION CREATION:
         Usage:
             may contain any assortment of different variables.
             may be as long as you want.
-            has the functions: .get(index), .insert(index, data), .append(data) and .remove(index)
     Json:
         Syntax:
             Json name {"6":7, 6:"7", six:seven, ...}
             Json name                                 this leaves it with a json with no key-value pairs
         Usage:
             as said many times before, the name is the name of the variable.
-            works just like normal json. to get a value with an id use the .id(id) method to
+LIST/JSON OPERATIONS:
+    GET:
+        Syntax:
+            GET json id to var
+            GET list index to var
+        Usage:
+            json/list is a variable input, id/index the the key for the json, or the index for the variable, and var is the output var name.
+    INSERT:
+        Syntax:
+            INSERT var index to list
+            INSERT var id to json
+        Usage:
+            if you dont know how lists work, keep it to the basics, and if you can, take an intro to CS class.
+    APPEND:
+        Syntax:
+            APPEND var to list
+            APPEND var id to json
+        Usage:
+            But if you don't have access to curricular CS classes, you can always use these resources:
+            https://youtu.be/xTtL8E4LzTQ?si=8_hNDRXLfhYfCqXP
+            https://www.w3schools.com/java/
+            Both of them are free to use for anybody. (W3 schools rescources are free, idk bout their full online courses tho)
+    REMOVE:
+        Syntax:
+            REMOVE index list
+            REMOVE id json
+            REMOVE index list to var    // acts like "pop"
+            REMOVE id json to var       // ^^^^^^^^^^^^^^^
+        Usage:
+            There will always be someone to help you, no matter where you are.
+    SET:
+        Syntax:
+            SET index varIn
+            SET id varIn
+        Usage:
+            i genuinely forgot about these functions when writing this project lOL
 MATH OPERATIONS:
     ADD:
         Syntax:
             ADD val1 val2 to var
             ADD val1 val2        // adds together and sets val1 to the sum, if val1 is a raw number, then set it to val2 instead, if both are raw numbers then if there is no target output, throw an error
         Usage:
-            var is where the calculation is outputed
+            var is where the calculation is outputted
             val1 and val2 are the inputs to the operation.
     SUB:
         Syntax:
@@ -153,7 +191,7 @@ MATH OPERATIONS:
         Usage:
             val is the inputed value
             var is where the ouput goes.
-LOGICAL OPERATORS:
+LOGICAL OPERATORS (logicOps):
     Not:
         Syntax:
             Bool A (Not B)
@@ -191,7 +229,7 @@ LOGICAL OPERATORS:
             "y'know python? y'know java? yea? it's literaly the same. except autistic as fuck! basicaly better!"
             (seriously tho, its just the same as everyone elses logic system)
 BASIC MOVEMENT COMMANDS:
-    turnTo:
+    TurnTo:
         syntax:
             turnTo(headingInDegree, deg/s)
         args:
@@ -199,13 +237,13 @@ BASIC MOVEMENT COMMANDS:
                 this is the heading angle that we want to end with after the
             deg/s:
                 this argument defines how fast to turn th robot in degrees per second
-    goTo:
+    GoTo:
         syntax:
             goTo(field coordinate/position)
         args:
             field coordinate/position:
                 this argument tells the auto to go to the given point in a straight line
-    followBezier:
+    DoSpline:
         syntax:
             followBezier (midPose/Cord... ,endPos)
         args:

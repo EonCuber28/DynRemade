@@ -1,1 +1,4 @@
 Apr 8: 11:53pm -> tokenizer fully works
+Apr 19: 6:56pm -> fully defined licenses, and created inital logo draft
+Apr 24: 1:31pm -> fully written all command classes (forgot about lists and json)
+Apr 28: 12:40pm -> Axel (17153/1410 tech director) told me I was peak, then proceeded to beg me join FRC next season.

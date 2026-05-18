@@ -6,12 +6,9 @@ import java.util.Map;
 
 public class Tokenizer {
 
-    private Map<Integer,Integer> lineMap = new HashMap<>();
-    private Map<Integer, Map<Integer, Integer>> charMap = new HashMap<>(); // clean line -> (clean char -> original char)
-    /*
-    this funciton handles the scrubbing of comments form the code defined by the description of comments in the docs at: ftcdyn.org (very much WIP rn)
-    it was also fixed (and enhanced) by claude Sonnet 4.6
-     */
+    private Map<Integer, Integer> lineMap = new HashMap<>();
+    private Map<Integer, Map<Integer, Integer>> charMap = new HashMap<>();
+
     private String[] removeComments(String[] in) {
         in = in.clone();
         ArrayList<String> out = new ArrayList<>();
@@ -47,16 +44,14 @@ public class Tokenizer {
                 i++;
             }
 
-            // Remap char indexes after strip/collapse
             String raw = lineBuffer.toString();
             String cleaned = raw.strip().replaceAll("\\s+", " ");
             if (!cleaned.isBlank()) {
                 int cleanLineIndex = out.size();
                 lineMap.put(cleanLineIndex, originalIndex);
 
-                // Build remapped charIndexMap accounting for strip/collapse
                 Map<Integer, Integer> remappedCharMap = new HashMap<>();
-                int rawOffset = raw.indexOf(cleaned.charAt(0)); // strip offset
+                int rawOffset = raw.indexOf(cleaned.charAt(0));
                 int cleanIdx = 0;
                 int rawIdx = rawOffset;
                 while (cleanIdx < cleaned.length() && rawIdx < raw.length()) {
@@ -85,12 +80,13 @@ public class Tokenizer {
         return out.toArray(new String[0]);
     }
 
-    public Token[] processScript(String script){
-        String[] lines = script.split("\r\n|\r|\n"); // chop it up
+    public Token[] processScript(String script) {
+        String[] lines = script.split("\r\n|\r|\n");
         lines = removeComments(lines);
         return tokenize(lines);
     }
-    public Token[] processScript(String[] lines){
+
+    public Token[] processScript(String[] lines) {
         lines = removeComments(lines);
         return tokenize(lines);
     }
@@ -101,21 +97,83 @@ public class Tokenizer {
 
         for (String line : cleanLines) {
             int lineIndex = lineMap.get(cleanLineIndex);
-            String[] lineChunks = line.split(" ");
             int cleanCharIndex = 0;
+            boolean inString = false;
+            StringBuilder stringBuffer = new StringBuilder();
+            int stringStartChar = -1;
 
-            for (String chunk : lineChunks) {
-                int charIndex = charMap.get(cleanLineIndex).getOrDefault(cleanCharIndex, -1);
-                //chunk line: lineIndex
-                //chunk char: charIndex
-                // tokenization process start
-                Token[] processedChunk = processChunk(chunk, lineIndex,charIndex);
-                for (Token token : processedChunk){
-                    tokens.add(token);
+            // FIX: handle string literals at line level before splitting on spaces,
+            // since string content may contain spaces
+            ArrayList<String> lineChunks = new ArrayList<>();
+            ArrayList<Integer> chunkOffsets = new ArrayList<>();
+
+            int i = 0;
+            StringBuilder chunkBuffer = new StringBuilder();
+            int chunkStart = 0;
+
+            while (i < line.length()) {
+                char c = line.charAt(i);
+                if (c == '"') {
+                    if (!inString) {
+                        // flush any pending chunk before the string
+                        if (chunkBuffer.length() > 0) {
+                            lineChunks.add(chunkBuffer.toString());
+                            chunkOffsets.add(chunkStart);
+                            chunkBuffer = new StringBuilder();
+                        }
+                        inString = true;
+                        stringStartChar = i;
+                        stringBuffer = new StringBuilder();
+                    } else {
+                        // end of string — emit as a special quoted chunk
+                        inString = false;
+                        lineChunks.add("\"" + stringBuffer.toString() + "\"");
+                        chunkOffsets.add(stringStartChar);
+                        chunkStart = i + 1;
+                    }
+                    i++;
+                    continue;
                 }
-                // tokenization process end
+                if (inString) {
+                    stringBuffer.append(c);
+                    i++;
+                    continue;
+                }
+                if (c == ' ') {
+                    if (chunkBuffer.length() > 0) {
+                        lineChunks.add(chunkBuffer.toString());
+                        chunkOffsets.add(chunkStart);
+                        chunkBuffer = new StringBuilder();
+                    }
+                    chunkStart = i + 1;
+                    i++;
+                    continue;
+                }
+                chunkBuffer.append(c);
+                i++;
+            }
+            if (chunkBuffer.length() > 0) {
+                lineChunks.add(chunkBuffer.toString());
+                chunkOffsets.add(chunkStart);
+            }
+            if (inString) {
+                throw new TokenizerException("Unterminated string literal", "line " + lineIndex);
+            }
 
-                cleanCharIndex += chunk.length() + 1;
+            for (int ci = 0; ci < lineChunks.size(); ci++) {
+                String chunk = lineChunks.get(ci);
+                int charIndex = charMap.get(cleanLineIndex).getOrDefault(chunkOffsets.get(ci), -1);
+
+                // FIX: handle quoted string chunks directly
+                if (chunk.startsWith("\"") && chunk.endsWith("\"") && chunk.length() >= 2) {
+                    String content = chunk.substring(1, chunk.length() - 1);
+                    tokens.add(new Token(TokenTypes.Literal, lineIndex, charIndex, content));
+                } else {
+                    Token[] processedChunk = processChunk(chunk, lineIndex, charIndex);
+                    for (Token token : processedChunk) {
+                        tokens.add(token);
+                    }
+                }
             }
 
             cleanLineIndex++;
@@ -123,220 +181,252 @@ public class Tokenizer {
 
         return tokens.toArray(new Token[0]);
     }
-    // fix to stop the creation of null TokenTypes for tokens was created my Claude Sonnet 4.6
-    private Token[] processChunk(String chunk, int lineIndex,int charIndex){
+
+    private Token[] processChunk(String chunk, int lineIndex, int charIndex) {
         int chunkSize = chunk.length();
         ArrayList<Token> out = new ArrayList<>();
-        // per character checks
         String internalChunk = "";
         int counter = 0;
+
         for (char piece : chunk.toCharArray()) {
             counter++;
-            // string handleing
-            if (piece == '"'){
-                // its a "string" literal so add the internal Chunk to a literal token
-                out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, "\""));
+
+            if (piece == '(') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-            }
-            //entering new traversal area -> mark with token
-            else if (piece == '('){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.Lparenth, lineIndex, charIndex));
+            } else if (piece == '[') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Lparenth, lineIndex,charIndex));
-            }
-            else if (piece == '['){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.Lbraket, lineIndex, charIndex));
+            } else if (piece == '{') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Lbraket, lineIndex,charIndex));
-            }
-            else if (piece == '{'){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.LCbraket, lineIndex, charIndex));
+            } else if (piece == ')') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.LCbraket, lineIndex,charIndex));
-            }
-            //exiting traversal area -> mark with token
-            else if (piece == ')'){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.Rparenth, lineIndex, charIndex));
+            } else if (piece == ']') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Rparenth, lineIndex,charIndex));
-            }
-            else if (piece == ']'){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.Rbraket, lineIndex, charIndex));
+            } else if (piece == '}') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Rbraket, lineIndex,charIndex));
-            }
-            else if (piece == '}'){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
+                out.add(new Token(TokenTypes.RCbraket, lineIndex, charIndex));
+            } else if (piece == ',') {
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.RCbraket, lineIndex,charIndex));
-            }
-            // is comma? -> mark wth token
-            else if (piece == ','){
-                flushInternalChunk(internalChunk, out, lineIndex,charIndex);
-                internalChunk = "";
-                out.add(new Token(TokenTypes.Comma, lineIndex,charIndex));
-            }
-            else {
-                internalChunk = internalChunk+piece;
-                // now we ask questions
-                //is there a variable declaration?
-                if (internalChunk.equals("FieldCord")){
-                    out.add(new Token(TokenTypes.FieldCord, lineIndex,charIndex));
+                out.add(new Token(TokenTypes.Comma, lineIndex, charIndex));
+            } else {
+                internalChunk = internalChunk + piece;
+
+                // FIX: comparison operators — checked before any alpha keywords
+                // multi-char operators first to avoid prefix conflicts
+                if (internalChunk.equals("==")) {
+                    out.add(new Token(TokenTypes.Equals, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("FieldPos")){
-                    out.add(new Token(TokenTypes.FieldPos, lineIndex,charIndex));
+                } else if (internalChunk.equals("!=")) {
+                    out.add(new Token(TokenTypes.NotEqual, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Num")){
-                    out.add(new Token(TokenTypes.Number, lineIndex,charIndex));
+                } else if (internalChunk.equals(">=")) {
+                    out.add(new Token(TokenTypes.isMore, lineIndex, charIndex)); // >= isMore
                     internalChunk = "";
-                } else if (internalChunk.equals("Bool")){
-                    out.add(new Token(TokenTypes.Bool, lineIndex,charIndex));
+                } else if (internalChunk.equals("<=")) {
+                    out.add(new Token(TokenTypes.isLess, lineIndex, charIndex)); // <= isLess
                     internalChunk = "";
-                } else if (internalChunk.equals("String")){
-                    out.add(new Token(TokenTypes.String, lineIndex,charIndex));
+                } else if (internalChunk.equals(">")) {
+                    // peek: if next char is '=' we need to keep accumulating — handled above on next iteration
+                    // if this is the last char or next isn't '=', emit now
+                    if (counter == chunkSize || chunk.charAt(counter) != '=') {
+                        out.add(new Token(TokenTypes.isMore, lineIndex, charIndex));
+                        internalChunk = "";
+                    }
+                } else if (internalChunk.equals("<")) {
+                    if (counter == chunkSize || chunk.charAt(counter) != '=') {
+                        out.add(new Token(TokenTypes.isLess, lineIndex, charIndex));
+                        internalChunk = "";
+                    }
+                }
+                // list/json operations
+                else if (internalChunk.equals("GET")) {
+                    out.add(new Token(TokenTypes.Get, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("List")){
-                    out.add(new Token(TokenTypes.List, lineIndex,charIndex));
+                } else if (internalChunk.equals("INSERT")) {
+                    out.add(new Token(TokenTypes.Insert, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Json")){
-                    out.add(new Token(TokenTypes.Json, lineIndex,charIndex));
+                } else if (internalChunk.equals("APPEND")) {
+                    out.add(new Token(TokenTypes.Append, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("REMOVE")) {
+                    out.add(new Token(TokenTypes.Remove, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("SET")) {
+                    out.add(new Token(TokenTypes.Set, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is there a math command?
-                else if (internalChunk.equals("ADD")){
-                    out.add(new Token(TokenTypes.Add, lineIndex,charIndex));
+                // variable declarations
+                else if (internalChunk.equals("FieldCord")) {
+                    out.add(new Token(TokenTypes.FieldCord, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SUB")){
-                    out.add(new Token(TokenTypes.Sub, lineIndex,charIndex));
+                } else if (internalChunk.equals("FieldPos")) {
+                    out.add(new Token(TokenTypes.FieldPos, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("MUX")){
-                    out.add(new Token(TokenTypes.Mux, lineIndex,charIndex));
+                } else if (internalChunk.equals("Num")) {
+                    out.add(new Token(TokenTypes.Number, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("DIV")){
-                    out.add(new Token(TokenTypes.Div, lineIndex,charIndex));
+                } else if (internalChunk.equals("Bool")) {
+                    out.add(new Token(TokenTypes.Bool, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("POW")){
-                    out.add(new Token(TokenTypes.Pow, lineIndex,charIndex));
+                } else if (internalChunk.equals("String")) {
+                    out.add(new Token(TokenTypes.String, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SQR")){
-                    out.add(new Token(TokenTypes.Sqrt, lineIndex,charIndex));
+                } else if (internalChunk.equals("List")) {
+                    out.add(new Token(TokenTypes.List, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SIN")){
-                    out.add(new Token(TokenTypes.Sin, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("invSIN")){
-                    out.add(new Token(TokenTypes.iSin, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("COS")){
-                    out.add(new Token(TokenTypes.Cos, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("invCOS")){
-                    out.add(new Token(TokenTypes.iCos, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("TAN")){
-                    out.add(new Token(TokenTypes.Tan, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("invTAN")){
-                    out.add(new Token(TokenTypes.iTan, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("toDeg")){
-                    out.add(new Token(TokenTypes.toDeg, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("toRad")){
-                    out.add(new Token(TokenTypes.toRad, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("Inc")){
-                    out.add(new Token(TokenTypes.Increment, lineIndex,charIndex));
+                } else if (internalChunk.equals("Json")) {
+                    out.add(new Token(TokenTypes.Json, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is there a pointer?
-                else if (internalChunk.equals("to")){
-                    out.add(new Token(TokenTypes.To, lineIndex,charIndex));
+                // math commands
+                else if (internalChunk.equals("ADD")) {
+                    out.add(new Token(TokenTypes.Add, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("SUB")) {
+                    out.add(new Token(TokenTypes.Sub, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("MUX")) {
+                    out.add(new Token(TokenTypes.Mux, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("DIV")) {
+                    out.add(new Token(TokenTypes.Div, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("POW")) {
+                    out.add(new Token(TokenTypes.Pow, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("SQR")) {
+                    out.add(new Token(TokenTypes.Sqrt, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("SIN")) {
+                    out.add(new Token(TokenTypes.Sin, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("invSIN")) {
+                    out.add(new Token(TokenTypes.iSin, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("COS")) {
+                    out.add(new Token(TokenTypes.Cos, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("invCOS")) {
+                    out.add(new Token(TokenTypes.iCos, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("TAN")) {
+                    out.add(new Token(TokenTypes.Tan, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("invTAN")) {
+                    out.add(new Token(TokenTypes.iTan, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("toDeg")) {
+                    out.add(new Token(TokenTypes.toDeg, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("toRad")) {
+                    out.add(new Token(TokenTypes.toRad, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("Inc")) {
+                    out.add(new Token(TokenTypes.Increment, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                // is it a function/loop/condition declaration?
-                else if (internalChunk.equals("def_path")){
-                    out.add(new Token(TokenTypes.DefPath, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("for")){
-                    out.add(new Token(TokenTypes.For, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("while")){
-                    out.add(new Token(TokenTypes.While, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("if")){
-                    out.add(new Token(TokenTypes.If, lineIndex,charIndex));
+                // FIX: Dec was missing
+                else if (internalChunk.equals("Dec")) {
+                    out.add(new Token(TokenTypes.Decrement, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is it a ending declaration?
-                else if (internalChunk.equals("end")){
-                    out.add(new Token(TokenTypes.End, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("autoPath")){
-                    out.add(new Token(TokenTypes.MainPathFunc, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("start")){
-                    out.add(new Token(TokenTypes.Start, lineIndex,charIndex));
+                // pointer
+                else if (internalChunk.equals("to")) {
+                    out.add(new Token(TokenTypes.To, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is it a logical operator?
-                else if (internalChunk.equals("Or")){
-                    out.add(new Token(TokenTypes.Or, lineIndex,charIndex));
+                // function/loop/condition declarations
+                else if (internalChunk.equals("def_path")) {
+                    out.add(new Token(TokenTypes.DefPath, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("And")){
-                    out.add(new Token(TokenTypes.And, lineIndex,charIndex));
+                } else if (internalChunk.equals("for")) {
+                    out.add(new Token(TokenTypes.For, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Not")){
-                    out.add(new Token(TokenTypes.Not, lineIndex,charIndex));
+                } else if (internalChunk.equals("while")) {
+                    out.add(new Token(TokenTypes.While, lineIndex, charIndex));
                     internalChunk = "";
-                }
-                //is it movement command?
-                else if (internalChunk.equals("turnTo")){
-                    out.add(new Token(TokenTypes.TurnTo, lineIndex,charIndex));
+                } else if (internalChunk.equals("if")) {
+                    out.add(new Token(TokenTypes.If, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("goTo")){
-                    out.add(new Token(TokenTypes.GoTo, lineIndex,charIndex));
+                } else if (internalChunk.equals("end")) {
+                    out.add(new Token(TokenTypes.End, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("followBezier")){
-                    out.add(new Token(TokenTypes.DoPez, lineIndex,charIndex));
+                } else if (internalChunk.equals("autoPath")) {
+                    out.add(new Token(TokenTypes.MainPathFunc, lineIndex, charIndex));
                     internalChunk = "";
-                }
-                //it is a starting declaration?
-                else if (internalChunk.equals("PathStartPosition")){
-                    out.add(new Token(TokenTypes.PathStartPos, lineIndex,charIndex));
+                } else if (internalChunk.equals("start")) {
+                    out.add(new Token(TokenTypes.Start, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is it a jFunc/path_func call?
-                else if (internalChunk.equals("jFunc")){
-                    out.add(new Token(TokenTypes.Cmd, lineIndex,charIndex));
+                // logical operators
+                else if (internalChunk.equals("Or")) {
+                    out.add(new Token(TokenTypes.Or, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RUN")){
-                    out.add(new Token(TokenTypes.Run, lineIndex,charIndex));
+                } else if (internalChunk.equals("And")) {
+                    out.add(new Token(TokenTypes.And, lineIndex, charIndex));
                     internalChunk = "";
-                }
-                //is it a telemetry command?
-                else if (internalChunk.equals("AddData")){
-                    out.add(new Token(TokenTypes.AddData, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("Update")){
-                    out.add(new Token(TokenTypes.Update, lineIndex,charIndex));
-                    internalChunk = "";
-                } else if (internalChunk.equals("Clear")){
-                    out.add(new Token(TokenTypes.Clear, lineIndex,charIndex));
+                } else if (internalChunk.equals("Not")) {
+                    out.add(new Token(TokenTypes.Not, lineIndex, charIndex));
                     internalChunk = "";
                 }
-                //is it a random command?
-                else if (internalChunk.equals("RndFlt")){
-                    out.add(new Token(TokenTypes.RngFloat, lineIndex,charIndex));
+                // movement commands
+                else if (internalChunk.equals("turnTo")) {
+                    out.add(new Token(TokenTypes.TurnTo, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RngDbl")){
-                    out.add(new Token(TokenTypes.RngDouble, lineIndex,charIndex));
+                } else if (internalChunk.equals("goTo")) {
+                    out.add(new Token(TokenTypes.GoTo, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Rngint")){
-                    out.add(new Token(TokenTypes.RngInteger, lineIndex,charIndex));
+                } else if (internalChunk.equals("followBezier")) {
+                    out.add(new Token(TokenTypes.DoPez, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RngBool")){
-                    out.add(new Token(TokenTypes.RngBoolean, lineIndex,charIndex));
+                }
+                // starting declaration
+                else if (internalChunk.equals("PathStartPosition")) {
+                    out.add(new Token(TokenTypes.PathStartPos, lineIndex, charIndex));
+                    internalChunk = "";
+                }
+                // jFunc / RUN
+                else if (internalChunk.equals("jFunc")) {
+                    out.add(new Token(TokenTypes.Cmd, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("RUN")) {
+                    out.add(new Token(TokenTypes.Run, lineIndex, charIndex));
+                    internalChunk = "";
+                }
+                // telemetry
+                else if (internalChunk.equals("AddData")) {
+                    out.add(new Token(TokenTypes.AddData, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("Update")) {
+                    out.add(new Token(TokenTypes.Update, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("Clear")) {
+                    out.add(new Token(TokenTypes.Clear, lineIndex, charIndex));
+                    internalChunk = "";
+                }
+                // FIX: RndFlt -> RngFlt, Rngint -> RngInt to match doc
+                else if (internalChunk.equals("RngFlt")) {
+                    out.add(new Token(TokenTypes.RngFloat, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("RngDbl")) {
+                    out.add(new Token(TokenTypes.RngDouble, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("RngInt")) {
+                    out.add(new Token(TokenTypes.RngInteger, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("RngBool")) {
+                    out.add(new Token(TokenTypes.RngBoolean, lineIndex, charIndex));
                     internalChunk = "";
                 } else {
                     if (counter == chunkSize) {
@@ -348,18 +438,19 @@ public class Tokenizer {
 
         return out.toArray(new Token[0]);
     }
+
     private void flushInternalChunk(String internalChunk, ArrayList<Token> out, int lineIndex, int charIndex) {
         if (internalChunk.isEmpty()) return;
         if (internalChunk.equals("true")) {
             out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, true));
         } else if (internalChunk.equals("false")) {
             out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, false));
-        } else if (Character.isDigit(internalChunk.charAt(0))) {
+        } else if (Character.isDigit(internalChunk.charAt(0)) || (internalChunk.charAt(0) == '-' && internalChunk.length() > 1)) {
             if (!internalChunk.contains(".")) internalChunk += ".0";
             try {
                 out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, Double.parseDouble(internalChunk)));
             } catch (NumberFormatException e) {
-                throw new TokenizerException(e.getMessage(), "invalid number format at line" + lineIndex + " column:" + charIndex);
+                throw new TokenizerException(e.getMessage(), "invalid number format at line " + lineIndex + " column: " + charIndex);
             }
         } else {
             out.add(new Token(TokenTypes.Name, lineIndex, charIndex, internalChunk));
