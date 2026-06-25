@@ -6,6 +6,7 @@ public enum TokenTypes {
     Lparenth, Rparenth, Comma,
     Lbraket, Rbraket,
     LCbraket,RCbraket,
+    Colon,
     // math commands
     Add,Sub,Mux,Div,
     Pow,Sqrt,Sin,iSin,
@@ -21,9 +22,13 @@ public enum TokenTypes {
     Remove,Set,
     // logical Ops
     Equals,NotEqual,isMore,
+    isMoreEqual,isLessEqual,
     isLess,And,Or,Not,
     // movement ops
-    TurnTo,GoTo,DoPez, // DoPez is the bezier command
+    TurnTo,GoTo,
+    doBez,followSpline,
+    followSplineLinear,
+    followsplineSpline,
     // func/loop/if
     DefPath,Run,While,For,If,
     // telemetry

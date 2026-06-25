@@ -1,7 +1,7 @@
 package org.SquidSquad.CommandSequencer.Commands.movement;
 
 import org.SquidSquad.CommandSequencer.Commands.Command;
-import org.SquidSquad.CommandSequencer.Commands.CommandException;
+import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
@@ -53,7 +53,7 @@ public class GoTo extends Command {
 
     @Override
     public void run(){
-        double[] start = getRobotPose.get();
+        double[] start = getBotPos.get();
         double[] end;
         if (Literal){
             switch (pos.length){
@@ -119,15 +119,15 @@ public class GoTo extends Command {
         }
     }
     private void moveSE(double[] start, double[] end){ // this feels way too simple compared to SplineTo
-        moveTo.accept(new double[][]{start, end});
+        moveTo.accept(end);
         if (isLinearFollower) waitForIdle();
     }
     private void waitForIdle(){
-        while (!isBotIdle.get()){
+        while (!isIdle.get()){
             long start = System.currentTimeMillis();
 
             updateFollower.run();
-            runUpdate.run();
+            updateLoop.run();
 
             long diff = System.currentTimeMillis() - start;
             long sleep = 10-diff;

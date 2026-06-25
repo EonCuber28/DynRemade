@@ -1,7 +1,7 @@
 package org.SquidSquad.CommandSequencer.Commands.Function;
 
 import org.SquidSquad.CommandSequencer.Commands.Command;
-import org.SquidSquad.CommandSequencer.Commands.CommandException;
+import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 

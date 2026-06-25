@@ -13,7 +13,7 @@ public class Token {
         return line;
     }
 
-    private Object getValue(){
+    public Object getValue(){
         return value;
     }
 
@@ -121,5 +121,9 @@ public class Token {
             default -> tokenType = "null (BAD)";
         }
         return "[Line,Char "+line+","+col+"; "+tokenType+"; "+value+"]";
+    }
+
+    public int getColumn() {
+        return col;
     }
 }

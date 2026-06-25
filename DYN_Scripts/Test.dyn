@@ -141,7 +141,10 @@ def_path VarTypeTest start
     If (T) start
         Inc counter
     end
-    If ()
+    If (Not F) start
+    end
+    If () start
+    end
     // test string
     // test list
     // test json
@@ -149,6 +152,7 @@ end
 
 def_path RngTest start
     Num trials 1000
+    //
 end
 
 def_path verifyResults start
@@ -156,7 +160,7 @@ def_path verifyResults start
     //add
     //sub
     //div
-    // penis
+    //
 end
 
 autoPath Main

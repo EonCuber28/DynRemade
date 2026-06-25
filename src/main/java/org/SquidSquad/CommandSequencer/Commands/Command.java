@@ -1,83 +1,71 @@
 package org.SquidSquad.CommandSequencer.Commands;
 
+import org.SquidSquad.CommandSequencer.CommandException;
+import org.SquidSquad.CommandSequencer.Commands.movement.SplineStuff.splineType;
 import org.SquidSquad.CommandSequencer.VariableManager;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Command {
-    protected static boolean canBez;
-    protected static boolean canSpline;
-    protected static boolean isLinearFollower;
-    protected static Consumer<double[][]> doSpline;
-    protected static Consumer<double[][]> doBez;
-    protected static Consumer<double[][]> moveTo;       // required
-    protected static Consumer<Double> turnTo;         // required
-    protected static Supplier<Boolean> isBotIdle;
-    protected static Supplier<double[]> getRobotPose; // required
-    protected static Runnable runUpdate;
-    protected static Runnable updateFollower;
-    protected static Runnable isOpModeRunning; // needed for ensuring we stop non-linear move commands when op mode is stopped
-    public void registerUpdaters(Runnable updateLoop, Runnable isOpModeRunning){
-        runUpdate = updateLoop;
-        Command.isOpModeRunning = isOpModeRunning;
-    }
-    public void registerUpdaters(Runnable updateLoop, Runnable isOpModeRunning, Runnable updateFollower){
-        runUpdate = updateLoop;
-        Command.isOpModeRunning = isOpModeRunning;
-        Command.updateFollower = updateFollower;
-    }
-    public void registerFollower(Supplier<Boolean> isBotIdle, Supplier<double[]> getRobotPose, Consumer<double[][]> moveTo, Consumer<Double> turnTo){
-        canBez = false; canSpline = false;
-        isLinearFollower = false;
-
-        Command.moveTo = moveTo;
-        Command.turnTo = turnTo;
-        Command.isBotIdle = isBotIdle;
-        Command.getRobotPose = getRobotPose;
-    }
-    public void registerFollower(Supplier<Boolean> isBotIdle, Supplier<double[]> getRobotPose, Consumer<double[][]> moveTo, Consumer<Double> turnTo, Consumer<double[][]> doCurve, boolean usesSpline){
-        canBez = !usesSpline;
-        canSpline = !canBez;
-        isLinearFollower = false;
-
-        Command.moveTo = moveTo;
-        Command.turnTo = turnTo;
-        Command.isBotIdle = isBotIdle;
-        Command.getRobotPose = getRobotPose;
-
-        if (canBez) Command.doBez = doCurve;
-        else Command.doSpline = doCurve;
-    }
-    public void registerFollower(Consumer<double[][]> moveTo, Supplier<double[]> getRobotPose, Consumer<Double> turnTo){
-        canBez = false; canSpline = false;
-        isLinearFollower = true;
-
-        Command.moveTo = moveTo;
-        Command.turnTo = turnTo;
-        Command.getRobotPose = getRobotPose;
-    }
-    public void registerFollower(Consumer<double[][]> moveTo, Supplier<double[]> getRobotPose, Consumer<Double> turnTo, Consumer<double[][]> doCurve, boolean usesSpline){
-        canBez = !usesSpline;
-        canSpline = !canBez;
-        isLinearFollower = true;
-
-        Command.moveTo = moveTo;
-        Command.turnTo = turnTo;
-        Command.getRobotPose = getRobotPose;
-
-        if (canBez) Command.doBez = doCurve;
-        else Command.doSpline = doCurve;
-    }
-
+    // telemetry thing
     protected static ArrayList<String> telemBuffer = new ArrayList<>();
+    // misc linker stuff
     protected static Consumer<String> runDynPath;
-    public void registerDynPathRunner(Consumer<String> runner){
-        runDynPath = runner;
+    public static void registerPathRunner(Consumer<String> runner){
+        Command.runDynPath = runner;
     }
-    protected VariableManager varManager;
+    // pathPlanner linker stuff
+    protected static Consumer<double[]> moveTo;
+    protected static Consumer<Double> turnTo;
+    public static void registerCommonActions(Consumer<double[]> movey, Consumer<Double> turny){
+        Command.moveTo = movey;
+        Command.turnTo = turny;
+    }
+
+    protected static boolean doFollowerSpline = false;
+    protected static boolean doFollowerBez = false;
+    protected static BiConsumer<double[],splineType> doSpline;
+    protected static Consumer<double[][]> doBez;
+    public static void registerDoSpline(BiConsumer<double[],splineType> spliney){
+        Command.doFollowerSpline = true;
+        Command.doSpline = spliney;
+    }
+    public static void registerDoBez(Consumer<double[][]> bezzy){
+        Command.doFollowerBez = true;
+        Command.doBez = bezzy;
+    }
+
+    protected static boolean isLinearFollower = true;
+    protected static Supplier<double[]> getBotPos;
+    public static void registerPosGetter(Supplier<double[]> getter){
+        Command.isLinearFollower = false;
+        Command.getBotPos = getter;
+    }
+
+    protected static Runnable updateLoop;
+    protected static Runnable updateFollower;
+    protected static Supplier<Boolean> isIdle;
+    public static void registerMainLoop(Runnable updater){
+        Command.updateLoop = updater;
+    }
+    public static void registerFollowerUpdater(Runnable updater, Supplier<Boolean> isIdle){
+        Command.updateFollower = updater;
+        Command.isIdle = isIdle;
+    }
+    protected static Supplier<double[]> getRobotPose;
+    public static void registerRobotPose(Supplier<double[]> roboPose){
+        getRobotPose = roboPose;
+    }
+
+    // the rest of the class
+    protected static VariableManager varManager;
+    public static void linkVarMan(VariableManager varMan){
+        Command.varManager = varMan;
+    }
     private Variable getVar(String ID){
         return varManager.getVar(ID);
     }
@@ -85,7 +73,7 @@ public class Command {
     protected String[] InVarIDs;
     protected String OutVarID;
 
-    private CommandType type;
+    private final CommandType type;
 
     protected int line;
 
@@ -108,6 +96,10 @@ public class Command {
         this.OutVarID = OutVarID;
     }
 
+    public void addCommand(Command cmd){
+        throw new CommandException(line,type.toString(),"Cannot add command to this command");
+    }
+
     public void run(){}
 
     // getters
@@ -126,7 +118,7 @@ public class Command {
     // debug
     public String toString(){
         // "@lineN: Type; [InID1,InID2]; outID"
-        String out = "@line"+line+": ";
+        StringBuilder out = new StringBuilder("@line" + line + ": ");
         String commandType;
         switch (type){
             case For -> commandType = "For";
@@ -154,7 +146,8 @@ public class Command {
             case Sqrt -> commandType = "Sqrt";
             case Sub -> commandType = "Sub";
 
-            case SplineTo -> commandType = "Bezier";
+            case SplineTo -> commandType = "Spline";
+            case BezTo ->  commandType = "Bezier";
             case GoTo -> commandType = "GoTo";
             case TurnTo -> commandType = "TurnTo";
 
@@ -170,14 +163,14 @@ public class Command {
             case SetVar -> commandType = "SetVar";
             default -> commandType = "Null/Undef (VERY BAD)";
         }
-        out = out+commandType+"; [";
+        out.append(commandType).append("; [");
         for (int i = 0; i < InVarIDs.length; i++){
-            out = out+InVarIDs[i];
+            out.append(InVarIDs[i]);
             if (i != InVarIDs.length-1){
-                out = out+", ";
+                out.append(", ");
             }
         }
-        out = out+"]; "+OutVarID;
-        return out;
+        out.append("]; ").append(OutVarID);
+        return out.toString();
     }
 }

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.SquidSquad"
-version = "0.2-ALPHA"
+version = "0.3-ALPHA"
 
 repositories {
     mavenCentral()

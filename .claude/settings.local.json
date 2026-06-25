@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./count_lines.sh:*)"
+    ]
+  }
+}

@@ -14,7 +14,8 @@ public enum CommandType {
     Cos,iCos,iSin,iTan,
     Sin,Tan,toDeg,toRad,
     // movement
-    SplineTo,GoTo,TurnTo,
+    SplineTo,BezTo,
+    GoTo,TurnTo,
     // random
     RngBoolean,RngDouble,
     RngFloat,RngInteger,

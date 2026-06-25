@@ -1,4 +1,4 @@
-// imma call this file "Tina", cus it fat as fu-
+// imma call this file "Tina", cus it fat
 
 //this document assumes that you know basic python(variable versatility), lua(its structure), and java(methodology) and variables to a minimal extent.
 
@@ -195,6 +195,8 @@ LOGICAL OPERATORS (logicOps):
     Not:
         Syntax:
             Bool A (Not B)
+            Not A
+            Not A to B
         Usage:
             it inverts the boolean value that is directly in front of it.
             then just condenses down into one boolean value.
@@ -231,7 +233,7 @@ LOGICAL OPERATORS (logicOps):
 BASIC MOVEMENT COMMANDS:
     TurnTo:
         syntax:
-            turnTo(headingInDegree, deg/s)
+            turnTo (headingInDegree, deg/s)
         args:
             headingInDegree:
                 this is the heading angle that we want to end with after the
@@ -239,18 +241,38 @@ BASIC MOVEMENT COMMANDS:
                 this argument defines how fast to turn th robot in degrees per second
     GoTo:
         syntax:
-            goTo(field coordinate/position)
+            goTo (coordinate/position)
+            goTo variable
         args:
             field coordinate/position:
                 this argument tells the auto to go to the given point in a straight line
-    DoSpline:
+    followBezier:
+        Thanks to PP having a simple spline system, this is simple
         syntax:
             followBezier (midPose/Cord... ,endPos)
+            followBezier midPose to endPos             provides simple bezier
         args:
             midPos/Cord:
                 these args define all of the weight points in the bezier curve from start to finish.
             endPos:
                 this defines where the bot should end after the bezier curve.
+    followSpline:
+        Due to RR having 4 separate spline functions, I decided that we will just provide 1:1 functions.
+        |RR function| - - - - - - - - - - - - - - - - - - |DYN function|
+        splineTo(vector2d,endTangent)        ->         | followSpline coord endTangent
+                                                        | followSpline coord
+
+        splineToConstantHeading(vector2d,endTangent) -> | followSplineLinear coord heading
+                                                        | followSplineLinear coord
+
+        splineToLinearHeading(pose2d,endTangent)   ->   | followSplineLinear pos heading
+                                                        | followSplineLinear pos
+
+        splineToSplineHeading(pose2d,endTangent)   ->   | followSplineSpline pos heading
+                                                        | followSplineSpline pos
+
+        WARNING: If endTangent is not given, it will be calculated with the following expression:
+            endTangent = atan2(dest.y - current.y, dest.x - current.x)
 STARTING DECLARATIONS:
     PathStartPosition:
         Syntax:
@@ -295,21 +317,23 @@ TELEMETRY:
         syntax:
             AddData var
         Usage:
-            the var is any variable, its data will be added to telemetry output the next time it is updated. and will be added to the telemetry message buffer.
-            I (the current soul developer) Isaac Clark of FTC team 17153 and 32165 recommend that you use a string
+            the var is any variable, its data will be added to telemetry output the next time it is updated.
+            And will be added to the telemetry message buffer.
+            I (the only current DYN developer) Isaac Clark of FTC team 17153 and 32165 recommend that you use a string
             If the variable is NOT a string, it will be formatted in the following fashion: "Var_name: value".
-            The message will be truncated if it is longer than what the driver station telemetry comms can handle.
+            The message WILL be truncated if it is longer than what the driver station telemetry comms can handle.
     Update:
         syntax:
             Update
         Usage:
             sends the current telemetry buffer to the driver station.
             does not clear the telemetry buffer.
+            If the telemetry buffer is longer than 255 messages, then it only sends the last 255 messages in the buffer.
     Clear:
         syntax:
             Clear
         Usage:
-            clears the current telemetry buffer
+            clears the whole telemetry buffer.
 JAVA METHOD INTEGRATION:
     jFunc:
         syntax:

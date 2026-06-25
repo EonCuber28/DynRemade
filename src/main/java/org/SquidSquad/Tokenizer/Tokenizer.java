@@ -219,6 +219,10 @@ public class Tokenizer {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
                 out.add(new Token(TokenTypes.Comma, lineIndex, charIndex));
+            } else if (piece == ':'){
+                flushInternalChunk(internalChunk, out, lineIndex, charIndex);
+                internalChunk = "";
+                out.add(new Token(TokenTypes.Colon, lineIndex, charIndex));
             } else {
                 internalChunk = internalChunk + piece;
 
@@ -231,10 +235,10 @@ public class Tokenizer {
                     out.add(new Token(TokenTypes.NotEqual, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals(">=")) {
-                    out.add(new Token(TokenTypes.isMore, lineIndex, charIndex)); // >= isMore
+                    out.add(new Token(TokenTypes.isMoreEqual, lineIndex, charIndex)); // >= isMore
                     internalChunk = "";
                 } else if (internalChunk.equals("<=")) {
-                    out.add(new Token(TokenTypes.isLess, lineIndex, charIndex)); // <= isLess
+                    out.add(new Token(TokenTypes.isLessEqual, lineIndex, charIndex)); // <= isLess
                     internalChunk = "";
                 } else if (internalChunk.equals(">")) {
                     // peek: if next char is '=' we need to keep accumulating — handled above on next iteration
@@ -250,182 +254,191 @@ public class Tokenizer {
                     }
                 }
                 // list/json operations
-                else if (internalChunk.equals("GET")) {
+                else if (internalChunk.equals("GET") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Get, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("INSERT")) {
+                } else if (internalChunk.equals("INSERT") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Insert, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("APPEND")) {
+                } else if (internalChunk.equals("APPEND") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Append, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("REMOVE")) {
+                } else if (internalChunk.equals("REMOVE") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Remove, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SET")) {
+                } else if (internalChunk.equals("SET") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Set, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // variable declarations
-                else if (internalChunk.equals("FieldCord")) {
+                else if (internalChunk.equals("FieldCord") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.FieldCord, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("FieldPos")) {
+                } else if (internalChunk.equals("FieldPos") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.FieldPos, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Num")) {
+                } else if (internalChunk.equals("Num") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Number, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Bool")) {
+                } else if (internalChunk.equals("Bool") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Bool, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("String")) {
+                } else if (internalChunk.equals("String") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.String, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("List")) {
+                } else if (internalChunk.equals("List") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.List, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Json")) {
+                } else if (internalChunk.equals("Json") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Json, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // math commands
-                else if (internalChunk.equals("ADD")) {
+                else if (internalChunk.equals("ADD") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Add, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SUB")) {
+                } else if (internalChunk.equals("SUB") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Sub, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("MUX")) {
+                } else if (internalChunk.equals("MUX") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Mux, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("DIV")) {
+                } else if (internalChunk.equals("DIV") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Div, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("POW")) {
+                } else if (internalChunk.equals("POW") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Pow, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SQR")) {
+                } else if (internalChunk.equals("SQR") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Sqrt, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("SIN")) {
+                } else if (internalChunk.equals("SIN") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Sin, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("invSIN")) {
+                } else if (internalChunk.equals("invSIN") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.iSin, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("COS")) {
+                } else if (internalChunk.equals("COS") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Cos, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("invCOS")) {
+                } else if (internalChunk.equals("invCOS") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.iCos, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("TAN")) {
+                } else if (internalChunk.equals("TAN") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Tan, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("invTAN")) {
+                } else if (internalChunk.equals("invTAN") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.iTan, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("toDeg")) {
+                } else if (internalChunk.equals("toDeg") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.toDeg, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("toRad")) {
+                } else if (internalChunk.equals("toRad") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.toRad, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Inc")) {
+                } else if (internalChunk.equals("Inc") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Increment, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // FIX: Dec was missing
-                else if (internalChunk.equals("Dec")) {
+                else if (internalChunk.equals("Dec") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Decrement, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // pointer
-                else if (internalChunk.equals("to")) {
+                else if (internalChunk.equals("to") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.To, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // function/loop/condition declarations
-                else if (internalChunk.equals("def_path")) {
+                else if (internalChunk.equals("def_path") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.DefPath, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("for")) {
+                } else if (internalChunk.equals("for") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.For, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("while")) {
+                } else if (internalChunk.equals("while") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.While, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("if")) {
+                } else if (internalChunk.equals("if") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.If, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("end")) {
+                } else if (internalChunk.equals("end") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.End, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("autoPath")) {
+                } else if (internalChunk.equals("autoPath") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.MainPathFunc, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("start")) {
+                } else if (internalChunk.equals("start") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Start, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // logical operators
-                else if (internalChunk.equals("Or")) {
+                else if (internalChunk.equals("Or") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Or, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("And")) {
+                } else if (internalChunk.equals("And") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.And, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Not")) {
+                } else if (internalChunk.equals("Not") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Not, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // movement commands
-                else if (internalChunk.equals("turnTo")) {
+                else if (internalChunk.equals("turnTo") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.TurnTo, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("goTo")) {
+                } else if (internalChunk.equals("goTo") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.GoTo, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("followBezier")) {
-                    out.add(new Token(TokenTypes.DoPez, lineIndex, charIndex));
+                } else if (internalChunk.equals("followBezier") && isWordBoundary(chunk, counter, chunkSize)) {
+                    out.add(new Token(TokenTypes.doBez, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("followSpline") && isWordBoundary(chunk, counter, chunkSize)) {
+                    out.add(new Token(TokenTypes.followSpline, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("followSplineLinear") && isWordBoundary(chunk, counter, chunkSize)) {
+                    out.add(new Token(TokenTypes.followSplineLinear, lineIndex, charIndex));
+                    internalChunk = "";
+                } else if (internalChunk.equals("followSplineSpline") && isWordBoundary(chunk, counter, chunkSize)) {
+                    out.add(new Token(TokenTypes.followsplineSpline, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // starting declaration
-                else if (internalChunk.equals("PathStartPosition")) {
+                else if (internalChunk.equals("PathStartPosition") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.PathStartPos, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // jFunc / RUN
-                else if (internalChunk.equals("jFunc")) {
+                else if (internalChunk.equals("jFunc") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Cmd, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RUN")) {
+                } else if (internalChunk.equals("RUN") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Run, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // telemetry
-                else if (internalChunk.equals("AddData")) {
+                else if (internalChunk.equals("AddData") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.AddData, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Update")) {
+                } else if (internalChunk.equals("Update") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Update, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("Clear")) {
+                } else if (internalChunk.equals("Clear") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.Clear, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // FIX: RndFlt -> RngFlt, Rngint -> RngInt to match doc
-                else if (internalChunk.equals("RngFlt")) {
+                else if (internalChunk.equals("RngFlt") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.RngFloat, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RngDbl")) {
+                } else if (internalChunk.equals("RngDbl") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.RngDouble, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RngInt")) {
+                } else if (internalChunk.equals("RngInt") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.RngInteger, lineIndex, charIndex));
                     internalChunk = "";
-                } else if (internalChunk.equals("RngBool")) {
+                } else if (internalChunk.equals("RngBool") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.RngBoolean, lineIndex, charIndex));
                     internalChunk = "";
                 } else {
@@ -437,6 +450,12 @@ public class Tokenizer {
         }
 
         return out.toArray(new Token[0]);
+    }
+
+    private boolean isWordBoundary(String chunk, int counter, int chunkSize) {
+        return counter == chunkSize
+                || (!Character.isLetterOrDigit(chunk.charAt(counter))
+                && chunk.charAt(counter) != '_');
     }
 
     private void flushInternalChunk(String internalChunk, ArrayList<Token> out, int lineIndex, int charIndex) {

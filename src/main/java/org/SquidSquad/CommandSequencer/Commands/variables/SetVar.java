@@ -1,7 +1,7 @@
 package org.SquidSquad.CommandSequencer.Commands.variables;
 
 import org.SquidSquad.CommandSequencer.Commands.Command;
-import org.SquidSquad.CommandSequencer.Commands.CommandException;
+import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
 import org.SquidSquad.CommandSequencer.Variables.Variable;
 import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
@@ -55,6 +55,6 @@ public class SetVar extends Command {
         // construct new var
         Variable newbie = new Variable(valueType, value);
         // apply
-        varManager.getVar(InVarIDs[0]).setVariable(newbie);
+        varManager.getVar(InVarIDs[0]).setVariable(newbie.getClone());
     }
 }
