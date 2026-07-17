@@ -1,3 +1,4 @@
+# NOTE: This repo is still in a WIP stage
 ## Dynamite Programing Language For FTC Autos (**DYN**)
 ### Please refer to the [Docs](https://ftcdyn.org) for a full rundown of the
 1. #### Full setup
