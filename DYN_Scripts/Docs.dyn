@@ -88,29 +88,33 @@ LIST/JSON OPERATIONS:
             APPEND var to list
             APPEND var id to json
         Usage:
-            But if you don't have access to curricular CS classes, you can always use these resources:
+            But if you don't have access to curricular CS classes, you can always use these resources for java:
             https://youtu.be/xTtL8E4LzTQ?si=8_hNDRXLfhYfCqXP
             https://www.w3schools.com/java/
-            Both of them are free to use for anybody. (W3 schools rescources are free, idk bout their full online courses tho)
+            Both of them are free to use for anybody.
     REMOVE:
         Syntax:
             REMOVE index list
             REMOVE id json
-            REMOVE index list to var    // acts like "pop"
-            REMOVE id json to var       // ^^^^^^^^^^^^^^^
+            REMOVE index list to var    // acts like pythons "pop"
+            REMOVE id json to var       // ^^^^^^^^^^^^^^^^^^^^^^^
         Usage:
-            There will always be someone to help you, no matter where you are.
+            Both of the given resources are ones that I have used to help me learn java.
+            I used the Youtube one to get a general grasp of how tha language is structured,
+            and what things do what, to help build a personal toolbox of the language.
+            And I also used the W3Schools one to help me learn the different features in java,
+            and also the niche syntaxes this wonderful language has.
     SET:
         Syntax:
-            SET index varIn
-            SET id varIn
+            SET index varIn to list
+            SET id varIn to json
         Usage:
-            i genuinely forgot about these functions when writing this project lOL
+            There will always be someone to help you, no matter where you are.
 MATH OPERATIONS:
     ADD:
         Syntax:
             ADD val1 val2 to var
-            ADD val1 val2        // adds together and sets val1 to the sum, if val1 is a raw number, then set it to val2 instead, if both are raw numbers then if there is no target output, throw an error
+            ADD val1 val2        // adds together and sets val1 to the sum, if val1 is a raw number, then set it to val2 instead, if both are raw numbers then there is no target output, throw an error
         Usage:
             var is where the calculation is outputted
             val1 and val2 are the inputs to the operation.
@@ -230,25 +234,29 @@ LOGICAL OPERATORS (logicOps):
         Usage:
             "y'know python? y'know java? yea? it's literaly the same. except autistic as fuck! basicaly better!"
             (seriously tho, its just the same as everyone elses logic system)
-BASIC MOVEMENT COMMANDS:
+MOVEMENT COMMANDS:
     TurnTo:
         syntax:
-            turnTo (headingInDegree, deg/s)
+            turnTo targetHeading
         args:
-            headingInDegree:
+            targetHeading:
                 this is the heading angle that we want to end with after the
             deg/s:
                 this argument defines how fast to turn th robot in degrees per second
     GoTo:
         syntax:
-            goTo (coordinate/position)
-            goTo variable
-        args:
-            field coordinate/position:
-                this argument tells the auto to go to the given point in a straight line
+            goTo (X,Y)
+            goTo (X,Y,H)
+            goTo pos
+            goTo Coord
     followBezier:
-        Thanks to PP having a simple spline system, this is simple
+        Thanks to PP having a simple bezier system, this is simple
         syntax:
+            followBezier ((midX,midY), ... ,(endX,endY))
+            followBezier (midX,midY,midH) to (endX,endY,midH)
+            followBezier (midX,midY,midH) to (endX,endY)
+            followBezier (midX,midY) to (endX,endY,endH)
+            followBezier (midX,midY) to (endX,endY)
             followBezier (midPose/Cord... ,endPos)
             followBezier midPose to endPos             provides simple bezier
         args:
@@ -257,21 +265,21 @@ BASIC MOVEMENT COMMANDS:
             endPos:
                 this defines where the bot should end after the bezier curve.
     followSpline:
-        Due to RR having 4 separate spline functions, I decided that we will just provide 1:1 functions.
-        |RR function| - - - - - - - - - - - - - - - - - - |DYN function|
-        splineTo(vector2d,endTangent)        ->         | followSpline coord endTangent
-                                                        | followSpline coord
-
-        splineToConstantHeading(vector2d,endTangent) -> | followSplineLinear coord heading
-                                                        | followSplineLinear coord
-
-        splineToLinearHeading(pose2d,endTangent)   ->   | followSplineLinear pos heading
-                                                        | followSplineLinear pos
-
-        splineToSplineHeading(pose2d,endTangent)   ->   | followSplineSpline pos heading
-                                                        | followSplineSpline pos
-
-        WARNING: If endTangent is not given, it will be calculated with the following expression:
+        Due to RR having a bajillion separate spline functions, I decided that we will just provide 1:1 functions.
+        # |RR function| - - - - - - - - - - - - - - - -#- - -#-|DYN function| - - - - - - - - - - -#
+        | splineTo(vector2d,endTangent)                | ==> | followSpline coord endTangent       |
+        |                                              | ==> | followSpline coord                  |
+        | - - - - - - - - - - - - - - - - - - - - - - -#- - -#- - - - - - - - - - - - - - - - - - -|
+        | splineToConstantHeading(vector2d,endTangent) | ==> | followSplineLinear coord endTangent |
+        |                                              | ==> | followSplineLinear coord            |
+        | - - - - - - - - - - - - - - - - - - - - - - -#- - -#- - - - - - - - - - - - - - - - - - -|
+        | splineToLinearHeading(pose2d,endTangent)     | ==> | followSplineLinear pos endTangent   |
+        |                                              | ==> | followSplineLinear pos              |
+        | - - - - - - - - - - - - - - - - - - - - - - -#- - -#- - - - - - - - - - - - - - - - - - -|
+        | splineToSplineHeading(pose2d,endTangent)     | ==> | followSplineSpline pos endTangent   |
+        |                                              | ==> | followSplineSpline pos              |
+        # - - - - - - - - - - - - - - - - - - - - - - -#- - -#- - - - - - - - - - - - - - - - - - -#
+        NOTE: If endTangent is not given, it will be calculated with the following expression:
             endTangent = atan2(dest.y - current.y, dest.x - current.x)
 STARTING DECLARATIONS:
     PathStartPosition:
@@ -316,10 +324,12 @@ TELEMETRY:
     AddData:
         syntax:
             AddData var
+            AddData num
+            AddData "Hello World!"
         Usage:
             the var is any variable, its data will be added to telemetry output the next time it is updated.
             And will be added to the telemetry message buffer.
-            I (the only current DYN developer) Isaac Clark of FTC team 17153 and 32165 recommend that you use a string
+            I (the only current DYN developer) Izabella Clark of FTC team 17153 and 32165 recommend that you use a string
             If the variable is NOT a string, it will be formatted in the following fashion: "Var_name: value".
             The message WILL be truncated if it is longer than what the driver station telemetry comms can handle.
     Update:
@@ -328,7 +338,7 @@ TELEMETRY:
         Usage:
             sends the current telemetry buffer to the driver station.
             does not clear the telemetry buffer.
-            If the telemetry buffer is longer than 255 messages, then it only sends the last 255 messages in the buffer.
+            if a message in the telemetry buffer is longer than 256 characters, it will be automatically extended into a second message.
     Clear:
         syntax:
             Clear
@@ -344,7 +354,7 @@ JAVA METHOD INTEGRATION:
         Usage:
             the functions that are given to DYN, must only have inputs and outputs as DynVars, either as DynVar or as DynVar[].
             this can be used to get input from an op (for testing), get the angle of a servo, state of a subsystem, the current position etc.
-RANDOM: (why not)
+RANDOM: I believe that entropy should be utilized in autos
     RngFlt:
         Syntax:
             RngFlt var
@@ -372,6 +382,10 @@ RANDOM: (why not)
 
 
 def_path Main start
+    AddData "aspirations are"
+    AddData "finally met after much"
+    AddData "thought and time"
+    Update
 end
 
 autoPath Main

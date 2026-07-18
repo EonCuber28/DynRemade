@@ -1,16 +1,19 @@
 package org.SquidSquad.Tokenizer;
 
 public class Token {
-    private TokenTypes type;
+    private final TokenTypes type;
     private Object value;
-    private int line;
-    private int col;
+    private final int line;
+    private final int col;
 
     public TokenTypes type(){
         return type;
     }
     public int getLine(){
         return line;
+    }
+    public int getColumn() {
+        return col;
     }
 
     public Object getValue(){
@@ -37,11 +40,11 @@ public class Token {
             case Rparenth -> tokenType = "Right Parenthesis";
             case Comma -> tokenType = "Comma";
 
-            case Lbraket -> tokenType = "Left Bracket";
-            case Rbraket -> tokenType = "Right Bracket";
+            case Lbracket -> tokenType = "Left Bracket";
+            case Rbracket -> tokenType = "Right Bracket";
 
-            case LCbraket -> tokenType = "Left Curly Bracket";
-            case RCbraket ->  tokenType = "Right Curly Bracket";
+            case LCbracket -> tokenType = "Left Curly Bracket";
+            case RCbracket ->  tokenType = "Right Curly Bracket";
 
             // math ops
             case Add -> tokenType = "Add";
@@ -67,7 +70,7 @@ public class Token {
 
             // variable types
             case Number -> tokenType = "Number";
-            case Bool -> tokenType = "Boolean";
+            case BoolDef -> tokenType = "Boolean";
             case String -> tokenType = "String";
 
             case List -> tokenType = "List";
@@ -99,7 +102,7 @@ public class Token {
             case Clear -> tokenType = "Clear Telemetry";
 
             // literals
-            case Literal -> tokenType = "Literal"; // variable value, etc.
+            case Boolean -> tokenType = "Literal"; // variable value, etc.
             case Name -> tokenType = "Name"; // name of variable, or path func
 
             // random commands
@@ -121,9 +124,5 @@ public class Token {
             default -> tokenType = "null (BAD)";
         }
         return "[Line,Char "+line+","+col+"; "+tokenType+"; "+value+"]";
-    }
-
-    public int getColumn() {
-        return col;
     }
 }

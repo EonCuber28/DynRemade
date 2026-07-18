@@ -10,7 +10,7 @@ RED='\033[91m'; YEL='\033[93m'; GRN='\033[92m'
 CYN='\033[96m'; MAG='\033[95m'; WHT='\033[97m'
 
 OLLAMA_URL="http://192.168.1.87:11434/api/generate"
-OLLAMA_MODEL="richardyoung/gpt-oss-20b-abliterated:latest"
+OLLAMA_MODEL="MichelRosselli/GLM-4.5-Air:Q2_K"
 ROAST_THRESHOLD=101    # Grade D or F → call Ollama
 
 # ── Banner ─────────────────────────────────────────────────────────
@@ -588,7 +588,7 @@ sys.stdout.flush()
 PYSTREAM
 
     echo -e "  ${RED}${BOLD}┌──────────────────────────────────────────────────────────┐${R}"
-    echo -e "  ${RED}${BOLD}│   🤖  Grade ${GRADE} detected — consulting the AI judge...   │${R}"
+    echo -e "  ${RED}${BOLD}│     🤖  Grade ${GRADE} detected — consulting the AI judge...    │${R}"
     echo -e "  ${RED}${BOLD}└──────────────────────────────────────────────────────────┘${R}"
     echo ""
     echo -e "  ${RED}┌─ The Verdict ──────────────────────────────────────────────┐${R}"

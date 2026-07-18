@@ -9,6 +9,7 @@ public class RngFloat extends Command {
     }
     @Override
     public void run(){
+        super.run();
         float value = (float)(Math.random()*2.0 - 1.0);
         varManager.getVar(OutVarID).setValue(value);
     }

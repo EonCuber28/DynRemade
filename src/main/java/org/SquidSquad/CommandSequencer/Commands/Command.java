@@ -1,9 +1,10 @@
 package org.SquidSquad.CommandSequencer.Commands;
 
 import org.SquidSquad.CommandSequencer.CommandException;
-import org.SquidSquad.CommandSequencer.Commands.movement.SplineStuff.splineType;
+import org.SquidSquad.CommandSequencer.Commands.movement.splineStuff.SplineType;
 import org.SquidSquad.CommandSequencer.VariableManager;
-import org.SquidSquad.CommandSequencer.Variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableException;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
 
 public class Command {
     // telemetry thing
-    protected static ArrayList<String> telemBuffer = new ArrayList<>();
+    protected static final ArrayList<String> telemBuffer = new ArrayList<>();
     // misc linker stuff
     protected static Consumer<String> runDynPath;
     public static void registerPathRunner(Consumer<String> runner){
@@ -28,9 +29,9 @@ public class Command {
 
     protected static boolean doFollowerSpline = false;
     protected static boolean doFollowerBez = false;
-    protected static BiConsumer<double[],splineType> doSpline;
+    protected static BiConsumer<double[], SplineType> doSpline;
     protected static Consumer<double[][]> doBez;
-    public static void registerDoSpline(BiConsumer<double[],splineType> spliney){
+    public static void registerDoSpline(BiConsumer<double[], SplineType> spliney){
         Command.doFollowerSpline = true;
         Command.doSpline = spliney;
     }
@@ -75,7 +76,7 @@ public class Command {
 
     private final CommandType type;
 
-    protected int line;
+    protected final int line;
 
     public Command(int line, CommandType type, String[] InVarIDs, String OutVarID){
         this.line = line;
@@ -97,10 +98,12 @@ public class Command {
     }
 
     public void addCommand(Command cmd){
-        throw new CommandException(line,type.toString(),"Cannot add command to this command");
+        throw new CommandException(line,type.toString(),"Cannot add command to "+type+" command type!");
     }
 
-    public void run(){}
+    public void run(){
+        VariableException.setLine(line);
+    }
 
     // getters
     public CommandType getType(){

@@ -3,15 +3,15 @@ package org.SquidSquad.CommandSequencer.Commands.variables;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
-import org.SquidSquad.CommandSequencer.Variables.Variable;
-import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class SetVar extends Command {
     private Object value;
-    private VariableTypes valueType;
+    private final VariableTypes valueType;
     public SetVar(int line, String target, String value, boolean isVar){
         super(line, CommandType.SetVar,new String[]{target});
         if (isVar) {
@@ -52,6 +52,7 @@ public class SetVar extends Command {
 
     @Override
     public void run(){
+        super.run();
         // construct new var
         Variable newbie = new Variable(valueType, value);
         // apply

@@ -1,6 +1,6 @@
 package org.SquidSquad.CommandSequencer;
 
-import org.SquidSquad.CommandSequencer.Variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class VariableManager {
     }
 
     public String toString(){
-        // TODO: make this for debugging
+        // TODO: make this for debugging, and make it dump the entire ID -> var (as their toString) map.
         return "No ToString defined. MemAddr: " + Integer.toHexString(System.identityHashCode(this));
     }
 }

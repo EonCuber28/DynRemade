@@ -1,0 +1,81 @@
+## Version 1.0
+ - Integration with any autonomous pather
+   - Splines
+   - Beziers
+   - Line to point
+   - Turn to
+ - Integration with already existing Java code
+ - Basic Arrhythmic
+ - Basic Trig
+ - Basic logic
+ - While/For loops
+ - Python like Json and Lists
+ - Simple to learn/make/iterate language
+ - Basic layout of official docs
+    - Variables
+    - Commands
+    - Examples
+    - Pather integration
+    - For new FTC teams
+    - For experienced teams
+    - In-use example
+
+## Version 2.0
+ - Fully fleshed out docs
+   - Vscode and Android Studio plugins
+   - Full descriptions and valid uses for commands and variables
+   - Full debugging pathways for any given error
+     - error examples with code
+     - step-by-step guide
+   - tips and tricks
+ - Major codebase cleanup
+ - Major error facelift?
+ - FRC compatability
+ - Manual per-motor control
+    - PIDs?
+    - RPM
+    - RunTime
+    - Turn on/off
+    - Concurrent/1 at a time?
+    - Wait for finish
+ - Encoder I/0
+ - 12C device control
+ - Servo control
+ - Color sensor I/O
+
+## Version 3.0 (some of this might be moved to 2.0)
+ - vision (fiducials) I/O?
+   - camera data
+     - processing FPS
+     - processing res
+     - cam FPS
+     - cam FPS
+     - cam controls
+       - exposure
+       - gain
+       - WB
+       - focus
+       - PTZ
+   - normal apriltags 
+     - FTC lib
+     - limelite (need hardware, from DYN donations?)
+     - Per-game season est field pos?
+       - primarily uses vision
+       - falls back to auto estimation
+   - game pieces
+     - community supplied data?
+     - community supplied model?
+   - direct open CV??
+ - performance improvements?
+ - DYN config file?
+   - Custom Command set
+   - Custom Variable set
+   - Command name modifications
+   - Command format modifications
+   - global variables / variables with custom visibility
+   - static variables
+   - DYN lang safety overrides?
+ - Tuning mode
+   - PP tuning mode
+   - RR tuning mode
+   - motor PID tuning

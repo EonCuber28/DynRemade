@@ -9,6 +9,7 @@ public class RngBoolean extends Command {
     }
     @Override
     public void run(){
+        super.run();
         int decision = (int)(Math.random()*2);
         if (decision == 0) varManager.getVar(OutVarID).setValue(false);
         else varManager.getVar(OutVarID).setValue(true);

@@ -22,5 +22,7 @@ public enum CommandType {
     // telemetry
     AddData,Clear,Update,
     // variables
-    SetVar
+    SetVar,AddVar,Set,
+    Remove,Append,Get,
+    Insert
 }

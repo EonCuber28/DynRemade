@@ -9,6 +9,7 @@ public class Increment extends Command {
     }
     @Override
     public void run(){
+        super.run();
         varManager.getVar(InVarIDs[0]).Inc();
     }
 }

@@ -3,12 +3,23 @@ package org.SquidSquad.CommandSequencer.Commands.movement;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
-import org.SquidSquad.CommandSequencer.Variables.Variable;
-import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
 
 public class GoTo extends Command {
     private boolean Literal;
+    private boolean partial = false;
+    private Double x = null;
+    private Double y = null;
+    private Double h = null;
+    private String X = null;
+    private String Y = null;
+    private String H = null;
     private double[] pos;
+    public GoTo(int line, String var){
+        super(line, CommandType.GoTo,new String[]{var});
+        Literal = false;
+    }
     public GoTo(int line, double[] pose){
         super(line, CommandType.GoTo,new String[]{},"");
         Literal = true;
@@ -23,7 +34,36 @@ public class GoTo extends Command {
         }
         pos = pose.clone(); // we don't wanna touch the original (or worse, have the original touch US)
     }
-    public GoTo(int line, double x, double y, double h){
+    public GoTo(int line, double posX, double posY){
+        super(line, CommandType.GoTo, new String[]{
+                String.valueOf(posX),
+                String.valueOf(posY)});
+        Literal = true;
+        pos = new double[]{posX,posY};
+    }
+    public GoTo(int line, double posX, String varY){
+        super(line, CommandType.GoTo, new String[]{
+                String.valueOf(posX),
+                varY
+        });
+        partial = true;
+        x = posX;
+        Y = varY;
+    }
+    public GoTo(int line, String varX, double posY){
+        super(line, CommandType.GoTo, new String[]{
+                varX,
+                String.valueOf(posY)
+        });
+        partial = true;
+        X = varX;
+        y = posY;
+    }
+    public GoTo(int line, String varX, String varY){
+        super(line, CommandType.GoTo,new String[]{varX,varY});
+        Literal = false;
+    }
+    public GoTo(int line, double x,    double y,    double h){
         super(line, CommandType.GoTo, new String[]{
                 String.valueOf(x),
                 String.valueOf(y),
@@ -31,20 +71,69 @@ public class GoTo extends Command {
         Literal = true;
         pos = new double[]{x,y,h};
     }
-    public GoTo(int line, double x, double y){
+    public GoTo(int line, double posX, String varY, double h){
         super(line, CommandType.GoTo, new String[]{
-                String.valueOf(x),
-                String.valueOf(y)});
-        Literal = true;
-        pos = new double[]{x,y};
+                String.valueOf(posX),
+                varY,
+                String.valueOf(h)
+        });
+        partial = true;
+        x = posX;
+        Y = varY;
+        this.h = h;
     }
-    public GoTo(int line, String var){
-        super(line, CommandType.GoTo,new String[]{var});
-        Literal = false;
+    public GoTo(int line, String varX, double posY, double h){
+        super(line, CommandType.GoTo, new String[]{
+                varX,
+                String.valueOf(posY),
+                String.valueOf(h)
+        });
+        partial = true;
+        X = varX;
+        y = posY;
+        this.h = h;
     }
-    public GoTo(int line, String varX, String varY){
-        super(line, CommandType.GoTo,new String[]{varX,varY});
-        Literal = false;
+    public GoTo(int line, String posX, String posY, double h){
+        super(line, CommandType.GoTo, new String[]{
+                posX, posY,
+                String.valueOf(h)
+        });
+        partial = true;
+        X = posX;
+        Y = posY;
+        this.h = h;
+    }
+    public GoTo(int line, double posX, double posY, String varH){
+        super(line, CommandType.GoTo, new String[]{
+                String.valueOf(posX),
+                String.valueOf(posY),
+                varH
+        });
+        partial = true;
+        x = posX;
+        y = posY;
+        H = varH;
+    }
+    public GoTo(int line, double posX, String varY, String varH){
+        super(line, CommandType.GoTo, new String[]{
+                String.valueOf(posX),
+                varY, varH
+        });
+        partial = true;
+        x = posX;
+        Y = varY;
+        H = varH;
+    }
+    public GoTo(int line, String varX, double posY, String varH){
+        super(line, CommandType.GoTo, new String[]{
+                varX,
+                String.valueOf(posY),
+                varH
+        });
+        partial = true;
+        X = varX;
+        y = posY;
+        H = varH;
     }
     public GoTo(int line, String varX, String varY, String varH){
         super(line, CommandType.GoTo,new String[]{varX,varY,varH});
@@ -53,9 +142,40 @@ public class GoTo extends Command {
 
     @Override
     public void run(){
+        super.run();
         double[] start = getBotPos.get();
         double[] end;
-        if (Literal){
+        if (partial) {
+            if (H != null || h != null){
+                end = new double[3];
+                if (H != null) {
+                    end[2] = h;
+                }
+            } else {
+                end = new double[2];
+            }
+            if (X == null) {
+                end[0] = x;
+            } else {
+                Variable varX = varManager.getVar(X);
+                if (varX.getType() == VariableTypes.Number){
+                    end[0] = (double)varX.getValue();
+                } else {
+                    throw new CommandException(line,"GoTo","Expected number variable, got:"+varX.getType());
+                }
+            }
+            if (Y == null) {
+                end[1] = y;
+            } else {
+                Variable varY = varManager.getVar(Y);
+                if (varY.getType() == VariableTypes.Number){
+                    end[0] = (double)varY.getValue();
+                } else {
+                    throw new CommandException(line,"GoTo","Expected number variable, got:"+varY.getType());
+                }
+            }
+            moveSE(start, end);
+        } else if (Literal){
             switch (pos.length){
                 case 2 -> {
                     end = new double[]{

@@ -3,9 +3,12 @@ package org.SquidSquad.CommandSequencer.Commands.math.trig;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
 import org.SquidSquad.CommandSequencer.Commands.math.MathInCon;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynNumber;
 
 public class Sin extends Command {
-    private MathInCon inCon;
+    private final MathInCon inCon;
+    private boolean inIsNum = false;
+    private double inNum;
     public Sin(int line,String in, String out){
         super(line, CommandType.Sin,new String[]{in},out);
         inCon = MathInCon.I1O1;
@@ -14,11 +17,23 @@ public class Sin extends Command {
         super(line, CommandType.Sin, new String[]{var},var);
         inCon = MathInCon.I1;
     }
+    public Sin(int line, double in, String out){
+        super(line, CommandType.Sin, new String[]{String.valueOf(in)},out);
+        inCon = MathInCon.I1O1;
+        inIsNum = true;
+        inNum = in;
+    }
+
     @Override
     public void run(){
-        switch (inCon){
-            case I1O1 -> varManager.getVar(OutVarID).Sin(varManager.getVar(InVarIDs[0]));
-            case I1 -> varManager.getVar(OutVarID).Sin();
+        super.run();
+        if (inIsNum){
+            varManager.getVar(OutVarID).Sin(new DynNumber(inNum));
+        } else {
+            switch (inCon) {
+                case I1O1 -> varManager.getVar(OutVarID).Sin(varManager.getVar(InVarIDs[0]));
+                case I1 -> varManager.getVar(OutVarID).Sin();
+            }
         }
     }
 }

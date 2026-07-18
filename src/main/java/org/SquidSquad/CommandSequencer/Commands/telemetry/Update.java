@@ -9,6 +9,7 @@ public class Update extends Command {
     }
     @Override
     public void run(){
+        super.run();
         // clear the terminal for UNIX system (I don't care about windows)
         System.out.print("\033[H\033[2J");
         System.out.flush();

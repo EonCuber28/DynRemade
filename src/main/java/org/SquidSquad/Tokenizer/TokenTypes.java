@@ -4,8 +4,8 @@ package org.SquidSquad.Tokenizer;
 public enum TokenTypes {
     // single char tokens
     Lparenth, Rparenth, Comma,
-    Lbraket, Rbraket,
-    LCbraket,RCbraket,
+    Lbracket, Rbracket,        // L/R brackets '[' + ']'
+    LCbracket,RCbracket,       // L/R curly brackets '{' + '}'
     Colon,
     // math commands
     Add,Sub,Mux,Div,
@@ -14,7 +14,7 @@ public enum TokenTypes {
     toRad,toDeg,
     Increment, Decrement,
     // variables
-    Number,Bool,String,
+    NumberDef,BoolDef,StringDef,
     List,Json,FieldCord,
     FieldPos,
     // list/json Ops
@@ -28,13 +28,13 @@ public enum TokenTypes {
     TurnTo,GoTo,
     doBez,followSpline,
     followSplineLinear,
-    followsplineSpline,
+    followSplineSpline,
     // func/loop/if
     DefPath,Run,While,For,If,
     // telemetry
     AddData,Update,Clear,
     // literals
-    Literal, Name, // literal = value      Name=name (dummy)
+    Boolean,Name,Number,String,
     // random commands
     RngFloat,RngDouble,
     RngInteger,RngBoolean,

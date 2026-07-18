@@ -4,7 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class FileReader {
-    private String scriptDir;
+    private final String scriptDir;
     public FileReader(){
         scriptDir = "./DYN_Scripts"; // RIP windows users (I hope)
     }

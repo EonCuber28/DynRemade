@@ -6,8 +6,8 @@ import java.util.Map;
 
 public class Tokenizer {
 
-    private Map<Integer, Integer> lineMap = new HashMap<>();
-    private Map<Integer, Map<Integer, Integer>> charMap = new HashMap<>();
+    private final Map<Integer, Integer> lineMap = new HashMap<>();
+    private final Map<Integer, Map<Integer, Integer>> charMap = new HashMap<>();
 
     private String[] removeComments(String[] in) {
         in = in.clone();
@@ -116,7 +116,7 @@ public class Tokenizer {
                 if (c == '"') {
                     if (!inString) {
                         // flush any pending chunk before the string
-                        if (chunkBuffer.length() > 0) {
+                        if (!chunkBuffer.isEmpty()) {
                             lineChunks.add(chunkBuffer.toString());
                             chunkOffsets.add(chunkStart);
                             chunkBuffer = new StringBuilder();
@@ -127,7 +127,7 @@ public class Tokenizer {
                     } else {
                         // end of string — emit as a special quoted chunk
                         inString = false;
-                        lineChunks.add("\"" + stringBuffer.toString() + "\"");
+                        lineChunks.add("\"" + stringBuffer + "\"");
                         chunkOffsets.add(stringStartChar);
                         chunkStart = i + 1;
                     }
@@ -140,7 +140,7 @@ public class Tokenizer {
                     continue;
                 }
                 if (c == ' ') {
-                    if (chunkBuffer.length() > 0) {
+                    if (!chunkBuffer.isEmpty()) {
                         lineChunks.add(chunkBuffer.toString());
                         chunkOffsets.add(chunkStart);
                         chunkBuffer = new StringBuilder();
@@ -152,7 +152,7 @@ public class Tokenizer {
                 chunkBuffer.append(c);
                 i++;
             }
-            if (chunkBuffer.length() > 0) {
+            if (!chunkBuffer.isEmpty()) {
                 lineChunks.add(chunkBuffer.toString());
                 chunkOffsets.add(chunkStart);
             }
@@ -167,7 +167,7 @@ public class Tokenizer {
                 // FIX: handle quoted string chunks directly
                 if (chunk.startsWith("\"") && chunk.endsWith("\"") && chunk.length() >= 2) {
                     String content = chunk.substring(1, chunk.length() - 1);
-                    tokens.add(new Token(TokenTypes.Literal, lineIndex, charIndex, content));
+                    tokens.add(new Token(TokenTypes.String, lineIndex, charIndex, content));
                 } else {
                     Token[] processedChunk = processChunk(chunk, lineIndex, charIndex);
                     for (Token token : processedChunk) {
@@ -198,11 +198,11 @@ public class Tokenizer {
             } else if (piece == '[') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Lbraket, lineIndex, charIndex));
+                out.add(new Token(TokenTypes.Lbracket, lineIndex, charIndex));
             } else if (piece == '{') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.LCbraket, lineIndex, charIndex));
+                out.add(new Token(TokenTypes.LCbracket, lineIndex, charIndex));
             } else if (piece == ')') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
@@ -210,11 +210,11 @@ public class Tokenizer {
             } else if (piece == ']') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.Rbraket, lineIndex, charIndex));
+                out.add(new Token(TokenTypes.Rbracket, lineIndex, charIndex));
             } else if (piece == '}') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
-                out.add(new Token(TokenTypes.RCbraket, lineIndex, charIndex));
+                out.add(new Token(TokenTypes.RCbracket, lineIndex, charIndex));
             } else if (piece == ',') {
                 flushInternalChunk(internalChunk, out, lineIndex, charIndex);
                 internalChunk = "";
@@ -278,13 +278,13 @@ public class Tokenizer {
                     out.add(new Token(TokenTypes.FieldPos, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals("Num") && isWordBoundary(chunk, counter, chunkSize)) {
-                    out.add(new Token(TokenTypes.Number, lineIndex, charIndex));
+                    out.add(new Token(TokenTypes.NumberDef, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals("Bool") && isWordBoundary(chunk, counter, chunkSize)) {
-                    out.add(new Token(TokenTypes.Bool, lineIndex, charIndex));
+                    out.add(new Token(TokenTypes.BoolDef, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals("String") && isWordBoundary(chunk, counter, chunkSize)) {
-                    out.add(new Token(TokenTypes.String, lineIndex, charIndex));
+                    out.add(new Token(TokenTypes.StringDef, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals("List") && isWordBoundary(chunk, counter, chunkSize)) {
                     out.add(new Token(TokenTypes.List, lineIndex, charIndex));
@@ -401,7 +401,7 @@ public class Tokenizer {
                     out.add(new Token(TokenTypes.followSplineLinear, lineIndex, charIndex));
                     internalChunk = "";
                 } else if (internalChunk.equals("followSplineSpline") && isWordBoundary(chunk, counter, chunkSize)) {
-                    out.add(new Token(TokenTypes.followsplineSpline, lineIndex, charIndex));
+                    out.add(new Token(TokenTypes.followSplineSpline, lineIndex, charIndex));
                     internalChunk = "";
                 }
                 // starting declaration
@@ -448,7 +448,6 @@ public class Tokenizer {
                 }
             }
         }
-
         return out.toArray(new Token[0]);
     }
 
@@ -461,13 +460,13 @@ public class Tokenizer {
     private void flushInternalChunk(String internalChunk, ArrayList<Token> out, int lineIndex, int charIndex) {
         if (internalChunk.isEmpty()) return;
         if (internalChunk.equals("true")) {
-            out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, true));
+            out.add(new Token(TokenTypes.Boolean, lineIndex, charIndex, true));
         } else if (internalChunk.equals("false")) {
-            out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, false));
+            out.add(new Token(TokenTypes.Boolean, lineIndex, charIndex, false));
         } else if (Character.isDigit(internalChunk.charAt(0)) || (internalChunk.charAt(0) == '-' && internalChunk.length() > 1)) {
             if (!internalChunk.contains(".")) internalChunk += ".0";
             try {
-                out.add(new Token(TokenTypes.Literal, lineIndex, charIndex, Double.parseDouble(internalChunk)));
+                out.add(new Token(TokenTypes.Number, lineIndex, charIndex, Double.parseDouble(internalChunk)));
             } catch (NumberFormatException e) {
                 throw new TokenizerException(e.getMessage(), "invalid number format at line " + lineIndex + " column: " + charIndex);
             }

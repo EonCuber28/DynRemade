@@ -9,6 +9,7 @@ public class Clear extends Command {
     }
     @Override
     public void run(){
+        super.run();
         telemBuffer.clear();
     }
 }

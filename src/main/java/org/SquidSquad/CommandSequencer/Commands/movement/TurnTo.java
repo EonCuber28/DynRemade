@@ -3,10 +3,10 @@ package org.SquidSquad.CommandSequencer.Commands.movement;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
-import org.SquidSquad.CommandSequencer.Variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
 
 public class TurnTo extends Command {
-    private boolean Literal;
+    private final boolean Literal;
     private double angle;
     public TurnTo(int line, String var){
         super(line, CommandType.TurnTo, new String[]{var});
@@ -20,6 +20,7 @@ public class TurnTo extends Command {
 
     @Override
     public void run(){
+        super.run();
         if (Literal){
             turnTo.accept(angle);
         } else {

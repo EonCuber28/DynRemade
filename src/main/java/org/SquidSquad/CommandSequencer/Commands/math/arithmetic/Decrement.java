@@ -9,6 +9,7 @@ public class Decrement extends Command {
     }
     @Override
     public void run(){
-        super.varManager.getVar(super.InVarIDs[0]).Dec();
+        super.run();
+        varManager.getVar(super.InVarIDs[0]).Dec();
     }
 }

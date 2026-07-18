@@ -1,0 +1,91 @@
+package org.SquidSquad.CommandSequencer.Commands.variables;
+
+import org.SquidSquad.CommandSequencer.CommandException;
+import org.SquidSquad.CommandSequencer.Commands.Command;
+import org.SquidSquad.CommandSequencer.Commands.CommandType;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynBoolean;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynNumber;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynString;
+import org.SquidSquad.Tokenizer.Token;
+
+public class Remove extends Command{
+    private final String target;
+    private final Token InDex;
+    private String out = null;
+    public Remove(int line, Token InDex, String target){
+        super(line, CommandType.RngDouble, new String[]{InDex.toString(),target});
+        this.target = target;
+        this.InDex = InDex;
+    }
+    public Remove(int line, Token InDex, String target, String out){
+        super(line, CommandType.RngDouble, new String[]{InDex.toString(),target});
+        this.target = target;
+        this.InDex = InDex;
+        this.out = out;
+    }
+
+    public void run(){
+        super.run();
+        Variable tg = varManager.getVar(target);
+        if (tg == null){
+            throw new CommandException(line,"Set","Variable "+target+" is not defined!");
+        }
+        else {
+            VariableTypes targetType = tg.getType();
+            if (targetType != VariableTypes.FieldCord &&
+                    targetType != VariableTypes.FieldPos &&
+                    targetType != VariableTypes.List &&
+                    targetType != VariableTypes.Json){
+                throw new CommandException(line,"Remove","Cannot use non FieldCord/FieldPos/List/Json for this operation!");
+            }
+        }
+        if (out == null){
+            switch (InDex.type()){
+                case Boolean -> tg.remove(new DynBoolean((boolean)InDex.getValue()));
+                case Number -> tg.remove(new DynNumber((double)InDex.getValue()));
+                case String -> tg.remove(new DynString((String)InDex.getValue()));
+                case Name -> {
+                    Variable name = varManager.getVar((String)InDex.getValue());
+                    if (name == null) throw new CommandException(line,"Remove","Variable "+InDex.getValue()+" not defined!");
+                    tg.remove(name);
+                }
+                default -> throw new CommandException(line,"Remove","Expected a boolean/number/string/name | Got: "+InDex.type());
+            }
+        } else {
+            Variable outIe = varManager.getVar(out);
+            if (outIe == null) throw new CommandException(line,"Remove","Variable "+out+" not defined!");
+            switch (InDex.type()){
+                case Boolean -> {
+                    Variable id = new DynBoolean((boolean)InDex.getValue());
+                    outIe.set2get(tg,id);
+                    tg.remove(id);
+                }
+                case Number -> {
+                    if (tg.getType() == VariableTypes.Json){
+                        Variable id = new DynNumber((double)InDex.getValue());
+                        outIe.set2get(tg,id);
+                        tg.remove(id);
+                    } else {
+                        int id = (int)InDex.getValue();
+                        outIe.set2get(tg,id);
+                        tg.remove(id);
+                    }
+                }
+                case String -> {
+                    Variable id = new DynString((String)InDex.getValue());
+                    outIe.set2get(tg,id);
+                    tg.remove(id);
+                }
+                case Name -> {
+                    Variable name = varManager.getVar((String)InDex.getValue());
+                    if (name == null) throw new CommandException(line,"Remove","Variable "+InDex.getValue()+" not defined!");
+                    outIe.set2get(tg,name);
+                    tg.remove(name);
+                }
+                default -> throw new CommandException(line,"Remove","Expected a boolean/number/string/name | Got: "+InDex.type());
+            }
+        }
+    }
+}
