@@ -304,7 +304,7 @@ LOOPS:
             the code in the while loop will be ran until the given Bool becomes false
     for:
         syntax:
-            for number/list as value start ... end
+            for number/list to value start ... end
         Usage:
             the number MUST be a whole number with no decimals, and the value will be set to the current loop count.
             the list will be processed element by element and the value will be set to the current element

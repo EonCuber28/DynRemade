@@ -25,6 +25,7 @@ public class Set extends Command{
 
     @Override
     public void run(){
+        super.run();
         Variable target = varManager.getVar(OutVarID);
         if (target == null){
             throw new CommandException(line,"Set","Variable "+OutVarID+" is not defined!");

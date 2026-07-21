@@ -2,6 +2,10 @@ package org.SquidSquad.CommandSequencer;
 
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.Commands.controlFlow.Condition;
+import org.SquidSquad.CommandSequencer.Commands.controlFlow.For;
+import org.SquidSquad.CommandSequencer.Commands.controlFlow.If;
+import org.SquidSquad.CommandSequencer.Commands.controlFlow.While;
+import org.SquidSquad.CommandSequencer.Commands.function.DynPath;
 import org.SquidSquad.CommandSequencer.Commands.function.RunPath;
 import org.SquidSquad.CommandSequencer.Commands.math.arithmetic.*;
 import org.SquidSquad.CommandSequencer.Commands.math.trig.*;
@@ -19,11 +23,16 @@ import org.SquidSquad.CommandSequencer.Commands.telemetry.AddData;
 import org.SquidSquad.CommandSequencer.Commands.telemetry.Clear;
 import org.SquidSquad.CommandSequencer.Commands.telemetry.Update;
 import org.SquidSquad.CommandSequencer.Commands.variables.AddVar;
+import org.SquidSquad.CommandSequencer.Commands.variables.Append;
+import org.SquidSquad.CommandSequencer.Commands.variables.Get;
+import org.SquidSquad.CommandSequencer.Commands.variables.Remove;
 import org.SquidSquad.CommandSequencer.variables.VariableTypes;
 import org.SquidSquad.Tokenizer.Token;
 import org.SquidSquad.Tokenizer.TokenTypes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.SquidSquad.Tokenizer.TokenTypes.*;
 
@@ -37,6 +46,7 @@ public class CommandConstructor {
     private Token[] givenTokens;
     private final ArrayList<Command> depthTracker;
     private final ArrayList<Command> finalCommands;
+    private final Map<String, DynPath> funcIDmap;
     private int i;
 
     public CommandConstructor(String ogFile){
@@ -44,12 +54,21 @@ public class CommandConstructor {
         i = 0;
         depthTracker = new ArrayList<>();
         finalCommands = new ArrayList<>();
+        funcIDmap = new HashMap<>();
+    }
+
+    public String getMainFuncName(){
+        return mainFuncName;
+    }
+    public Map<String,DynPath> getFuncIDmap(){
+        return funcIDmap;
     }
 
     public void processTokens(Token[] tokenstream){
         givenTokens = tokenstream;
         while (i < tokenstream.length){
             delegateToken();
+            System.out.println(givenTokens[i].toString());
         }
     }
     private void delegateToken() {
@@ -111,18 +130,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new Sqrt(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new Sqrt(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new Sqrt(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new Sqrt(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Sqrt(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Sqrt(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -148,18 +167,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new Sin(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new Sin(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new Sin(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new Sin(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Sin(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Sin(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -184,18 +203,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new iSin(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new iSin(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new iSin(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new iSin(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new iSin(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new iSin(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -221,18 +240,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new Cos(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new Cos(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new Cos(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new Cos(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Cos(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Cos(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -258,18 +277,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new iCos(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new iCos(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new iCos(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new iCos(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new iCos(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new iCos(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -295,18 +314,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new Tan(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new Tan(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new Tan(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new Tan(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Tan(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Tan(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -332,18 +351,18 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new iTan(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new iTan(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 } else if (nextIsType(Number,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new iTan(number.getLine(), (double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new iTan(number.getLine(), (double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 } else if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new iTan(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new iTan(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     if (nextIsType(Name) || nextIsType(Number)){
@@ -368,7 +387,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Decrement(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Decrement(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -379,7 +398,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new Increment(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new Increment(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -390,7 +409,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new ToRad(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new ToRad(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -401,7 +420,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new ToDeg(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new ToDeg(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -416,9 +435,9 @@ public class CommandConstructor {
                     Token name1 = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Pow(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
@@ -426,9 +445,9 @@ public class CommandConstructor {
                     Token number = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Pow(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
@@ -437,8 +456,8 @@ public class CommandConstructor {
                     Token out = givenTokens[i+3];
                     addCommand(new Pow(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
@@ -448,14 +467,14 @@ public class CommandConstructor {
                     addCommand(new Pow(number0.getLine(),
                             (double)number0.getValue(),
                             (double)number1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+1];
                     addCommand(new Pow(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue()));
                     i+=2;
                 } else if (nextIsType(Number,Name)){
@@ -464,15 +483,15 @@ public class CommandConstructor {
                     Token name = givenTokens[i+1];
                     addCommand(new Pow(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue()));
+                            (String)name.getValue()));
                     i+=2;
                 } else if (nextIsType(Name,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     addCommand(new Pow(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue()));
                     i+=2;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -506,9 +525,9 @@ public class CommandConstructor {
                     Token name1 = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Div(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
@@ -516,9 +535,9 @@ public class CommandConstructor {
                     Token number = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Div(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
@@ -527,8 +546,8 @@ public class CommandConstructor {
                     Token out = givenTokens[i+3];
                     addCommand(new Div(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
@@ -538,14 +557,14 @@ public class CommandConstructor {
                     addCommand(new Div(number0.getLine(),
                             (double)number0.getValue(),
                             (double)number1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+1];
                     addCommand(new Div(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue()));
                     i+=2;
                 } else if (nextIsType(Number,Name)){
@@ -554,15 +573,15 @@ public class CommandConstructor {
                     Token name = givenTokens[i+1];
                     addCommand(new Div(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue()));
+                            (String)name.getValue()));
                     i+=2;
                 } else if (nextIsType(Name,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     addCommand(new Div(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue()));
                     i+=2;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -596,9 +615,9 @@ public class CommandConstructor {
                     Token name1 = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Mux(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
@@ -606,9 +625,9 @@ public class CommandConstructor {
                     Token number = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Mux(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
@@ -617,8 +636,8 @@ public class CommandConstructor {
                     Token out = givenTokens[i+3];
                     addCommand(new Mux(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
@@ -628,14 +647,14 @@ public class CommandConstructor {
                     addCommand(new Mux(number0.getLine(),
                             (double)number0.getValue(),
                             (double)number1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+1];
                     addCommand(new Mux(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue()));
                     i+=2;
                 } else if (nextIsType(Number,Name)){
@@ -644,15 +663,15 @@ public class CommandConstructor {
                     Token name = givenTokens[i+1];
                     addCommand(new Mux(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue()));
+                            (String)name.getValue()));
                     i+=2;
                 } else if (nextIsType(Name,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     addCommand(new Mux(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue()));
                     i+=2;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -686,9 +705,9 @@ public class CommandConstructor {
                     Token name1 = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Sub(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
@@ -696,9 +715,9 @@ public class CommandConstructor {
                     Token number = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Sub(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
@@ -707,8 +726,8 @@ public class CommandConstructor {
                     Token out = givenTokens[i+3];
                     addCommand(new Sub(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
@@ -718,14 +737,14 @@ public class CommandConstructor {
                     addCommand(new Sub(number0.getLine(),
                             (double)number0.getValue(),
                             (double)number1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+1];
                     addCommand(new Sub(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue()));
                     i+=2;
                 } else if (nextIsType(Number,Name)){
@@ -734,15 +753,15 @@ public class CommandConstructor {
                     Token name = givenTokens[i+1];
                     addCommand(new Sub(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue()));
+                            (String)name.getValue()));
                     i+=2;
                 } else if (nextIsType(Name,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     addCommand(new Sub(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue()));
                     i+=2;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -776,9 +795,9 @@ public class CommandConstructor {
                     Token name1 = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Add(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
@@ -786,9 +805,9 @@ public class CommandConstructor {
                     Token number = givenTokens[i+1];
                     Token out = givenTokens[i+3];
                     addCommand(new Add(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
@@ -797,8 +816,8 @@ public class CommandConstructor {
                     Token out = givenTokens[i+3];
                     addCommand(new Add(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)name.getValue(),
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
@@ -808,14 +827,14 @@ public class CommandConstructor {
                     addCommand(new Add(number0.getLine(),
                             (double)number0.getValue(),
                             (double)number1.getValue(),
-                            (java.lang.String)out.getValue()));
+                            (String)out.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+1];
                     addCommand(new Add(name.getLine(),
-                            (java.lang.String)name.getValue(),
+                            (String)name.getValue(),
                             (double)number.getValue()));
                     i+=2;
                 } else if (nextIsType(Number,Name)){
@@ -824,15 +843,15 @@ public class CommandConstructor {
                     Token name = givenTokens[i+1];
                     addCommand(new Add(number.getLine(),
                             (double)number.getValue(),
-                            (java.lang.String)name.getValue()));
+                            (String)name.getValue()));
                     i+=2;
                 } else if (nextIsType(Name,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     addCommand(new Add(name0.getLine(),
-                            (java.lang.String)name0.getValue(),
-                            (java.lang.String)name1.getValue()));
+                            (String)name0.getValue(),
+                            (String)name1.getValue()));
                     i+=2;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -890,28 +909,28 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new GoTo(name.getLine(),(java.lang.String)name.getValue()));
+                    addCommand(new GoTo(name.getLine(),(String)name.getValue()));
                     i++;
                 }
                 else if (nextIsType(Lparenth,Name,Comma,Name,Rparenth)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new GoTo(name0.getLine(),(java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new GoTo(name0.getLine(),(String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 }
                 else if (nextIsType(Lparenth,Name,Comma,Number,Rparenth)){
                     i++;
                     Token name = givenTokens[i];
                     Token number = givenTokens[i+2];
-                    addCommand(new GoTo(name.getLine(),(java.lang.String)name.getValue(),(double)number.getValue()));
+                    addCommand(new GoTo(name.getLine(),(String)name.getValue(),(double)number.getValue()));
                     i+=3;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Name,Rparenth)){
                     i++;
                     Token number = givenTokens[i];
                     Token name = givenTokens[i+2];
-                    addCommand(new GoTo(number.getLine(),(double)number.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new GoTo(number.getLine(),(double)number.getValue(),(String)name.getValue()));
                     i+=3;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Number,Rparenth)){
@@ -926,7 +945,7 @@ public class CommandConstructor {
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
                     Token name2 = givenTokens[i+4];
-                    addCommand(new GoTo(name0.getLine(),(java.lang.String)name0.getValue(),(java.lang.String)name1.getValue(),(java.lang.String)name2.getValue()));
+                    addCommand(new GoTo(name0.getLine(),(String)name0.getValue(),(String)name1.getValue(),(String)name2.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Name,Comma,Name,Comma,Number,Rparenth)){
@@ -934,7 +953,7 @@ public class CommandConstructor {
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
                     Token number = givenTokens[i+4];
-                    addCommand(new GoTo(name0.getLine(),(java.lang.String)name0.getValue(),(java.lang.String)name1.getValue(),(double)number.getValue()));
+                    addCommand(new GoTo(name0.getLine(),(String)name0.getValue(),(String)name1.getValue(),(double)number.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Name,Comma,Number,Comma,Name,Rparenth)){
@@ -942,7 +961,7 @@ public class CommandConstructor {
                     Token name0 = givenTokens[i];
                     Token number = givenTokens[i+2];
                     Token name1 = givenTokens[i+4];
-                    addCommand(new GoTo(name0.getLine(),(java.lang.String)name0.getValue(),(double)number.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new GoTo(name0.getLine(),(String)name0.getValue(),(double)number.getValue(),(String)name1.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Name,Comma,Name,Rparenth)){
@@ -950,7 +969,7 @@ public class CommandConstructor {
                     Token number = givenTokens[i];
                     Token name0 = givenTokens[i+2];
                     Token name1 = givenTokens[i+4];
-                    addCommand(new GoTo(number.getLine(),(double)number.getValue(),(java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new GoTo(number.getLine(),(double)number.getValue(),(String)name0.getValue(),(String)name1.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Name,Comma,Number,Comma,Number,Rparenth)){
@@ -958,7 +977,7 @@ public class CommandConstructor {
                     Token name = givenTokens[i];
                     Token number0 = givenTokens[i+2];
                     Token number1 = givenTokens[i+4];
-                    addCommand(new GoTo(name.getLine(),(java.lang.String)name.getValue(),(double)number0.getValue(),(double)number1.getValue()));
+                    addCommand(new GoTo(name.getLine(),(String)name.getValue(),(double)number0.getValue(),(double)number1.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Number,Comma,Name,Rparenth)){
@@ -966,7 +985,7 @@ public class CommandConstructor {
                     Token number0 = givenTokens[i];
                     Token number1 = givenTokens[i+2];
                     Token name = givenTokens[i+4];
-                    addCommand(new GoTo(number0.getLine(),(double)number0.getValue(),(double)number1.getValue(),(java.lang.String)name.getValue()));
+                    addCommand(new GoTo(number0.getLine(),(double)number0.getValue(),(double)number1.getValue(),(String)name.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Name,Comma,Number,Rparenth)){
@@ -974,7 +993,7 @@ public class CommandConstructor {
                     Token number0 = givenTokens[i];
                     Token name = givenTokens[i+2];
                     Token number1 = givenTokens[i+4];
-                    addCommand(new GoTo(number0.getLine(),(double)number0.getValue(),(java.lang.String)name.getValue(),(double)number1.getValue()));
+                    addCommand(new GoTo(number0.getLine(),(double)number0.getValue(),(String)name.getValue(),(double)number1.getValue()));
                     i+=5;
                 }
                 else if (nextIsType(Lparenth,Number,Comma,Number,Comma,Number,Rparenth)){
@@ -1039,7 +1058,7 @@ public class CommandConstructor {
                     i++;
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+2];
-                    addCommand(new DoBezier(name0.getLine(),(java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                    addCommand(new DoBezier(name0.getLine(),(String)name0.getValue(),(String)name1.getValue()));
                     i+=3;
                 }
                 // (x,y) to (x,y)
@@ -1971,20 +1990,20 @@ public class CommandConstructor {
                             i++;
                             Token name = givenTokens[i];
                             Token number = givenTokens[i+1];
-                            addCommand(new DoSpline(name.getLine(), (java.lang.String)name.getValue(),(java.lang.String)number.getValue()));
+                            addCommand(new DoSpline(name.getLine(), (String)name.getValue(),(String)number.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name,Name)){
                             i++;
                             Token name0 = givenTokens[i];
                             Token name1 = givenTokens[i+1];
-                            addCommand(new DoSpline(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                            addCommand(new DoSpline(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name)){
                             i++;
                             Token name = givenTokens[i];
-                            addCommand(new DoSpline(name.getLine(), (java.lang.String)name.getValue()));
+                            addCommand(new DoSpline(name.getLine(), (String)name.getValue()));
                             i++;
                         } else {
                             if (nextIsType(Name)){
@@ -2001,20 +2020,20 @@ public class CommandConstructor {
                             i++;
                             Token name = givenTokens[i];
                             Token number = givenTokens[i+1];
-                            addCommand(new DoSplineSpline(name.getLine(), (java.lang.String)name.getValue(),(java.lang.String)number.getValue()));
+                            addCommand(new DoSplineSpline(name.getLine(), (String)name.getValue(),(String)number.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name,Name)){
                             i++;
                             Token name0 = givenTokens[i];
                             Token name1 = givenTokens[i+1];
-                            addCommand(new DoSplineSpline(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                            addCommand(new DoSplineSpline(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name)){
                             i++;
                             Token name = givenTokens[i];
-                            addCommand(new DoSplineSpline(name.getLine(), (java.lang.String)name.getValue()));
+                            addCommand(new DoSplineSpline(name.getLine(), (String)name.getValue()));
                             i++;
                         } else {
                             if (nextIsType(Name)){
@@ -2031,20 +2050,20 @@ public class CommandConstructor {
                             i++;
                             Token name = givenTokens[i];
                             Token number = givenTokens[i+1];
-                            addCommand(new DoSplineLinear(name.getLine(), (java.lang.String)name.getValue(),(java.lang.String)number.getValue()));
+                            addCommand(new DoSplineLinear(name.getLine(), (String)name.getValue(),(String)number.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name,Name)){
                             i++;
                             Token name0 = givenTokens[i];
                             Token name1 = givenTokens[i+1];
-                            addCommand(new DoSplineLinear(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue()));
+                            addCommand(new DoSplineLinear(name0.getLine(), (String)name0.getValue(),(String)name1.getValue()));
                             i+=2;
                         }
                         else if (nextIsType(Name)){
                             i++;
                             Token name = givenTokens[i];
-                            addCommand(new DoSplineLinear(name.getLine(), (java.lang.String)name.getValue()));
+                            addCommand(new DoSplineLinear(name.getLine(), (String)name.getValue()));
                             i++;
                         } else {
                             if (nextIsType(Name)){
@@ -2064,7 +2083,7 @@ public class CommandConstructor {
         if (nextIsType(Name)){
             i++;
             Token name = givenTokens[i];
-            addCommand(new RunPath(name.getLine(),(java.lang.String)name.getValue()));
+            addCommand(new RunPath(name.getLine(),(String)name.getValue()));
             i++;
         } else {
             i++;
@@ -2080,7 +2099,7 @@ public class CommandConstructor {
                     Token name = givenTokens[i];
                     Token x = givenTokens[i+2];
                     Token y = givenTokens[i+4];
-                    addCommand(new AddVar(name.getLine(), (java.lang.String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
                     i+=5;
                 }
                 else if (nextIsType(Name,Lparenth,Number,Comma,Name,Rparenth)){
@@ -2088,7 +2107,7 @@ public class CommandConstructor {
                     Token name = givenTokens[i];
                     Token x = givenTokens[i+2];
                     Token y = givenTokens[i+4];
-                    addCommand(new AddVar(name.getLine(), (java.lang.String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
                     i+=5;
                 }
                 else if (nextIsType(Name,Lparenth,Name,Comma,Number,Rparenth)){
@@ -2096,7 +2115,7 @@ public class CommandConstructor {
                     Token name = givenTokens[i];
                     Token x = givenTokens[i+2];
                     Token y = givenTokens[i+4];
-                    addCommand(new AddVar(name.getLine(), (java.lang.String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
                     i+=5;
                 }
                 else if (nextIsType(Name,Lparenth,Number,Comma,Number,Rparenth)){
@@ -2104,7 +2123,7 @@ public class CommandConstructor {
                     Token name = givenTokens[i];
                     Token x = givenTokens[i+2];
                     Token y = givenTokens[i+4];
-                    addCommand(new AddVar(name.getLine(), (java.lang.String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.FieldCord, new Object[]{x.getValue(),y.getValue()}));
                     i+=5;
                 }
                 else {
@@ -2159,7 +2178,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new RngBoolean(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new RngBoolean(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -2172,28 +2191,28 @@ public class CommandConstructor {
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     Token name2 = givenTokens[i+3];
-                    addCommand(new RngInteger(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue(), (java.lang.String)name2.getValue()));
+                    addCommand(new RngInteger(name0.getLine(), (String)name0.getValue(),(String)name1.getValue(), (String)name2.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name0 = givenTokens[i+1];
                     Token name1 = givenTokens[i+3];
-                    addCommand(new RngInteger(number.getLine(), (double)number.getValue(),(java.lang.String)name0.getValue(), (java.lang.String)name1.getValue()));
+                    addCommand(new RngInteger(number.getLine(), (double)number.getValue(),(String)name0.getValue(), (String)name1.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token number = givenTokens[i+1];
                     Token name1 = givenTokens[i+3];
-                    addCommand(new RngInteger(name0.getLine(), (java.lang.String)name0.getValue(),(double)number.getValue(), (java.lang.String)name1.getValue()));
+                    addCommand(new RngInteger(name0.getLine(), (String)name0.getValue(),(double)number.getValue(), (String)name1.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
                     Token number0 = givenTokens[i];
                     Token number1 = givenTokens[i+1];
                     Token name = givenTokens[i+3];
-                    addCommand(new RngInteger(number0.getLine(), (double)number0.getValue(),(double)number1.getValue(), (java.lang.String)name.getValue()));
+                    addCommand(new RngInteger(number0.getLine(), (double)number0.getValue(),(double)number1.getValue(), (String)name.getValue()));
                     i+=4;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -2226,28 +2245,28 @@ public class CommandConstructor {
                     Token name0 = givenTokens[i];
                     Token name1 = givenTokens[i+1];
                     Token name2 = givenTokens[i+3];
-                    addCommand(new RngDouble(name0.getLine(), (java.lang.String)name0.getValue(),(java.lang.String)name1.getValue(), (java.lang.String)name2.getValue()));
+                    addCommand(new RngDouble(name0.getLine(), (String)name0.getValue(),(String)name1.getValue(), (String)name2.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Name,To,Name)){
                     i++;
                     Token number = givenTokens[i];
                     Token name0 = givenTokens[i+1];
                     Token name1 = givenTokens[i+3];
-                    addCommand(new RngDouble(number.getLine(), (double)number.getValue(),(java.lang.String)name0.getValue(), (java.lang.String)name1.getValue()));
+                    addCommand(new RngDouble(number.getLine(), (double)number.getValue(),(String)name0.getValue(), (String)name1.getValue()));
                     i+=4;
                 } else if (nextIsType(Name,Number,To,Name)){
                     i++;
                     Token name0 = givenTokens[i];
                     Token number = givenTokens[i+1];
                     Token name1 = givenTokens[i+3];
-                    addCommand(new RngDouble(name0.getLine(), (java.lang.String)name0.getValue(),(double)number.getValue(), (java.lang.String)name1.getValue()));
+                    addCommand(new RngDouble(name0.getLine(), (String)name0.getValue(),(double)number.getValue(), (String)name1.getValue()));
                     i+=4;
                 } else if (nextIsType(Number,Number,To,Name)){
                     i++;
                     Token number0 = givenTokens[i];
                     Token number1 = givenTokens[i+1];
                     Token name = givenTokens[i+3];
-                    addCommand(new RngDouble(number0.getLine(), (double)number0.getValue(),(double)number1.getValue(), (java.lang.String)name.getValue()));
+                    addCommand(new RngDouble(number0.getLine(), (double)number0.getValue(),(double)number1.getValue(), (String)name.getValue()));
                     i+=4;
                 } else {
                     if (nextIsType(Name)||nextIsType(Number)){
@@ -2278,7 +2297,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new RngFloat(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new RngFloat(name.getLine(), (String)name.getValue()));
                     i++;
                 } else {
                     i++;
@@ -2298,7 +2317,7 @@ public class CommandConstructor {
                 if (nextIsType(Name)){
                     i++;
                     Token name = givenTokens[i];
-                    addCommand(new AddData(name.getLine(), (java.lang.String)name.getValue()));
+                    addCommand(new AddData(name.getLine(), (String)name.getValue()));
                     i++;
                 } else if (nextIsType(Number)||nextIsType(Boolean)||nextIsType(String)) {
                     i++;
@@ -2408,49 +2427,199 @@ public class CommandConstructor {
         Token current = givenTokens[i];
         switch (current.type()){
             case Append -> {
-                if (nextIsType(Name,Name,To,Name)){
-                    i++;
-                    Token name0 = givenTokens[i];
-                    Token name1 = givenTokens[i+1];
-                    Token name2 = givenTokens[i+3];
-                    //addCommand(new Append(name0.getLine(), ));
-                } else if (nextIsType(Name,String,To,Name)){
-
-                } else if (nextIsType(Name,To,Name)){
-
+                if (givenTokens[i+2].type() == To){
+                    Token in = givenTokens[i+1];
+                    if (givenTokens[i+3].type() == Name){
+                        String out = (String)givenTokens[i+3].getValue();
+                        addCommand(new Append(in.getLine(),in,out));
+                        i+=4;
+                    } else {
+                        throwError("Must use variable as command output!");
+                    }
+                } else if (givenTokens[i+3].type() == To){
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+2];
+                    if (givenTokens[i+4].type() == Name){
+                        String out = (String)givenTokens[i+4].getValue();
+                        addCommand(new Append(in1.getLine(), in1,in2, out));
+                        i+=5;
+                    } else {
+                        throwError("Must use variable as command output!");
+                    }
+                    String out;
                 } else {
-                    if (nextIsType(Name)){
-                        i++;
-                        if (nextIsType(String)||nextIsType(Name)||nextIsType(To)){
-                            i++;
-                            if (nextIsType(Name)||nextIsType(To)){
-                                i++;
-                                if (!nextIsType(Name)){
-                                    i++;
-                                    throwError("Expected name | Got: "+givenTokens[i].type());
-                                }
-                            } else {
-                                i++;
-                                throwError("Expected name/\"to\" | Got: "+givenTokens[i].type());
-                            }
+                    throwError("Improperly formatted command!");
+                }
+            }
+            case Insert -> {
+                if (givenTokens[i+3].type() == To){
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+2];
+                    if (givenTokens[i+4].type() == Name){
+                        String out = (String)givenTokens[i+4].getValue();
+                        addCommand(new Append(in1.getLine(),in1,in2,out));
+                        i+=5;
+                    } else {
+                        throwError("Must use variable as command output!");
+                    }
+                } else {
+                    throwError("Improperly formatted command!");
+                }
+            }
+            case Remove -> {
+                if (givenTokens[i+3].type() == To){
+                    Token in1 = givenTokens[i+1];
+                    String in2 = "";
+                    if (givenTokens[i+2].type() == Name){
+                        in2 = (String)givenTokens[i+2].getValue();
+                    } else {
+                        throwError("Must use variable as command target!");
+                    }
+                    if (givenTokens[i+4].type() == Name){
+                        String out = (String)givenTokens[i+4].getValue();
+                        addCommand(new Remove(in1.getLine(), in1,in2, out));
+                        i+=5;
+                    } else {
+                        throwError("Must use variable as command output!");
+                    }
+                } else if (nextIsType(Boolean,Name)){
+                    Token in = givenTokens[i+1];
+                    String out = (String)givenTokens[i+2].getValue();
+                    addCommand(new Remove(in.getLine(), in, out));
+                    i+=3;
+                } else if (nextIsType(Number,Name)){
+                    Token in = givenTokens[i+1];
+                    String out = (String)givenTokens[i+2].getValue();
+                    addCommand(new Remove(in.getLine(), in, out));
+                    i+=3;
+                } else if (nextIsType(String,Name)){
+                    Token in = givenTokens[i+1];
+                    String out = (String)givenTokens[i+2].getValue();
+                    addCommand(new Remove(in.getLine(), in, out));
+                    i+=3;
+                } else if (nextIsType(Name,Name)){
+                    Token in = givenTokens[i+1];
+                    String out = (String)givenTokens[i+2].getValue();
+                    addCommand(new Remove(in.getLine(), in, out));
+                    i+=3;
+                } else {
+                    throwError("Improperly formatted command!");
+                }
+            }
+            case Get -> {
+                String in = "";
+                if (givenTokens[i+1].type() == Name){
+                    in = (String)givenTokens[i+1].getValue();
+                } else {
+                    throwError("Must use variable for command input!");
+                }
+                Token in1 = givenTokens[i+2];
+                if (givenTokens[i+3].type() == To) {
+                    if (givenTokens[i+4].type() == Name) {
+                        String out = (String) givenTokens[i+4].getValue();
+                        addCommand(new Get(in1.getLine(), in, in1, out));
+                        i+=5;
+                    } else {
+                        throwError("Must ise variable for command output!");
+                    }
+                } else {
+                    throwError("Improperly formatted command!");
+                }
+            }
+            case Set -> {
+                Token in1 = givenTokens[i+1];
+                Token in2 = givenTokens[i+2];
+                if (givenTokens[i+3].type() == To){
+                    if (givenTokens[i+4].type() == Name){
+                        String out = (String)givenTokens[i+4].getValue();
+                        addCommand(new org.SquidSquad.CommandSequencer.Commands.variables.Set(in1.getLine(), in1,in2, out));
+                    } else {
+                        throwError("Must use variable as command output!");
+                    }
+                } else {
+                    throwError("Improperly formatted command!");
+                }
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + current.type());
+        }
+    }
+    private void processFuncLoopIf(){
+        Token currentToken = givenTokens[i];
+        switch (currentToken.type()){
+            case DefPath -> {
+                if (nextIsType(Name)){
+                    i++;
+                    if (nextIsType(Start)){
+                        if (depthTracker.isEmpty()){
+                            DynPath func = new DynPath(givenTokens[i].getLine());
+                            funcIDmap.put((String)givenTokens[i].getValue(), func);
+                            depthTracker.add(func);
                         } else {
-                            i++;
-                            throwError("Expected string/name/\"To\" | Got: "+givenTokens[i].type());
+                            throwError("Cannot defined functions inside of functions!");
                         }
                     } else {
                         i++;
-                        throwError("Expected name | Got: "+givenTokens[i].type());
+                        throwError("Expected start | Got: "+givenTokens[i].type());
+                    }
+                } else {
+                    i++;
+                    throwError("Expected name | Got: "+givenTokens[i].type());
+                }
+            }
+            case While -> {
+                if (nextIsType(Boolean)){
+                    i++;
+                    Token bool = givenTokens[i];
+                    addCommand(new While(bool.getLine(), new Condition(bool.getLine(),(boolean)bool.getValue())));
+                    i++;
+                } else if (nextIsType(Lparenth)){
+                    Token tk = givenTokens[i];
+                    Condition con = processCondition();
+                    addCommand(new While(tk.getLine(),con));
+                } else {
+                    i++;
+                    throwError("Expected boolean/condition | Got: "+givenTokens[i].type());
+                }
+            }
+            case For -> {
+                i++;
+                if (nextIsType(To,Name,Start)){
+                    addCommand(new For(getLine(), givenTokens[i], (String)givenTokens[i+2].getValue()));
+                    i+=3;
+                } else {
+                    if (nextIsType(To)){
+                        i++;
+                        if (nextIsType(Name)){
+                            i++;
+                            if (!nextIsType(Start)){
+                                i++;
+                                throwError("Expcted start | Got: "+givenTokens[i].type());
+                            }
+                        } else {
+                            i++;
+                            throwError("Expected name | Got: "+givenTokens[i].type());
+                        }
+                    } else {
+                        i++;
+                        throwError("Expected to | Got: "+givenTokens[i].type());
                     }
                 }
             }
-            case Insert -> {}
-            case Remove -> {}
-            case Get -> {}
-            case Set -> {}
+            case If -> {
+                Condition con = processCondition();
+                addCommand(new If(getLine(),con));
+                i+=2;
+            }
         }
     }
-    private void processFuncLoopIf(){}
-    private void processMainPathFunc(){}
+    private void processMainPathFunc(){
+        if (nextIsType(Name)){
+            mainFuncName = (String)givenTokens[i+1].getValue();
+        } else {
+            i++;
+            throwError("Expected name | Got: "+givenTokens[i].type());
+        }
+    }
 
     private void addCommand(Command c){
         if (!depthTracker.isEmpty()) {

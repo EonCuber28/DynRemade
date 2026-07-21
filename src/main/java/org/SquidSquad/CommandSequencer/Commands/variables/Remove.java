@@ -30,7 +30,7 @@ public class Remove extends Command{
         super.run();
         Variable tg = varManager.getVar(target);
         if (tg == null){
-            throw new CommandException(line,"Set","Variable "+target+" is not defined!");
+            throw new CommandException(line,"Remove","Variable "+target+" is not defined!");
         }
         else {
             VariableTypes targetType = tg.getType();

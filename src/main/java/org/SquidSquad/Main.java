@@ -1,6 +1,11 @@
 package org.SquidSquad;
 
 import java.util.Scanner;
+
+import org.SquidSquad.CommandSequencer.CommandConstructor;
+import org.SquidSquad.CommandSequencer.CommandRunner;
+import org.SquidSquad.CommandSequencer.Commands.Command;
+import org.SquidSquad.CommandSequencer.Commands.CommandType;
 import org.SquidSquad.FileReader;
 import org.SquidSquad.Tokenizer.Token;
 import org.SquidSquad.Tokenizer.Tokenizer;
@@ -46,8 +51,10 @@ public class Main {
         // test tokenizer
         tk = new Tokenizer();
         Token[] tokens = tk.processScript(ScriptContents);
-        for(Token tk : tokens) println(tk.toString());
-        scanner.close();
+        CommandConstructor cc = new CommandConstructor(ScriptContents);
+        cc.processTokens(tokens);
+        CommandRunner cr = new CommandRunner(cc);
+        cr.run();
     }
     private static void println(Object toBePrinted){
         System.out.println(toBePrinted);

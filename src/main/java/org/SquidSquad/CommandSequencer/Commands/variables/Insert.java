@@ -1,7 +1,13 @@
 package org.SquidSquad.CommandSequencer.Commands.variables;
 
+import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynBoolean;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynNumber;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynString;
 import org.SquidSquad.Tokenizer.Token;
 
 public class Insert extends Command{
@@ -17,5 +23,41 @@ public class Insert extends Command{
 
     public void run(){
         super.run();
+        Variable target = varManager.getVar(OutVarID);
+        if (target == null){
+            throw new CommandException(line,"Insert","Variable "+OutVarID+" is not defined!");
+        }
+        else {
+            VariableTypes targetType = target.getType();
+            if (targetType != VariableTypes.FieldCord &&
+                targetType != VariableTypes.FieldPos &&
+                targetType != VariableTypes.List &&
+                targetType != VariableTypes.Json){
+                throw new CommandException(line,"Insert","Cannot use non FieldCord/FieldPos/List/Json for this operation!");
+            }
+        }
+        Variable id;
+        switch (InDex.type()){
+            case Boolean -> id = new DynBoolean((boolean)InDex.getValue());
+            case Number -> id = new DynNumber((double)InDex.getValue());
+            case String -> id = new DynString((String)InDex.getValue());
+            case Name -> {
+                Variable ID = varManager.getVar((String)InDex.getValue());
+                if (ID == null) throw new CommandException(line,"Insert","Variable "+InDex.getValue()+" not defined!");
+                id = ID;
+            }
+            default -> throw new CommandException(line,"Insert","Expected a boolean/number/string/name | Got: "+InDex.type());
+        }
+        switch (in.type()){
+            case Boolean -> target.insertVar(new DynBoolean((boolean)in.getValue()),id);
+            case Number -> target.insertVar(new DynNumber((double)in.getValue()),id);
+            case String -> target.insertVar(new DynString((String)in.getValue()),id);
+            case Name -> {
+                Variable in = varManager.getVar((String)this.in.getValue());
+                if (in == null) throw new CommandException(line,"Insert","Variable "+InDex+" not defined!");
+                target.insertVar(in,id);
+            }
+            default -> throw new CommandException(line,"Insert","Expected a boolean/number/string/name | Got: "+in.type());
+        }
     }
 }

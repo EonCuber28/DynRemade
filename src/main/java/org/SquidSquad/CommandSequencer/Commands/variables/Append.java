@@ -1,7 +1,13 @@
 package org.SquidSquad.CommandSequencer.Commands.variables;
 
+import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
+import org.SquidSquad.CommandSequencer.variables.Variable;
+import org.SquidSquad.CommandSequencer.variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynBoolean;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynNumber;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynString;
 import org.SquidSquad.Tokenizer.Token;
 
 public class Append extends Command{
@@ -19,5 +25,55 @@ public class Append extends Command{
 
     public void run(){
         super.run();
+        Variable target = varManager.getVar(OutVarID);
+        if (target == null){
+            throw new CommandException(line,"Append","Variable "+OutVarID+" is not defined!");
+        }
+        else {
+            VariableTypes targetType = target.getType();
+            if (targetType != VariableTypes.FieldCord &&
+                targetType != VariableTypes.FieldPos &&
+                targetType != VariableTypes.List &&
+                targetType != VariableTypes.Json){
+                throw new CommandException(line,"Append","Cannot use non FieldCord/FieldPos/List/Json for this operation!");
+            }
+        }
+        if (idx == null){
+            switch (inTk.type()){
+                case Boolean -> target.append(new DynBoolean((boolean)inTk.getValue()));
+                case Number -> target.append(new DynNumber((double)inTk.getValue()));
+                case String -> target.append(new DynString((String)inTk.getValue()));
+                case Name -> {
+                    Variable in = varManager.getVar((String)inTk.getValue());
+                    if (in == null) throw new CommandException(line,"Append","Variable "+inTk.getValue()+" not defined!");
+                    target.append(in);
+                }
+                default -> throw new CommandException(line,"Append","Expected a boolean/number/string/name | Got: "+inTk.type());
+            }
+        } else {
+            Variable id;
+            switch (idx.type()){
+                case Boolean -> id = new DynBoolean((boolean)idx.getValue());
+                case Number -> id = new DynNumber((double)idx.getValue());
+                case String -> id = new DynString((String)idx.getValue());
+                case Name -> {
+                    Variable in = varManager.getVar((String)idx.getValue());
+                    if (in == null) throw new CommandException(line,"Append","Variable "+idx.getValue()+" not defined!");
+                    id = in;
+                }
+                default -> throw new CommandException(line,"Append","Cannot use "+idx.type()+" as index/id!");
+            }
+            switch (inTk.type()){
+                case Boolean -> target.append(new DynBoolean((boolean)inTk.getValue()),id);
+                case Number -> target.append(new DynNumber((double)inTk.getValue()),id);
+                case String -> target.append(new DynString((String)inTk.getValue()),id);
+                case Name -> {
+                    Variable in = varManager.getVar((String)inTk.getValue());
+                    if (in == null) throw new CommandException(line,"Append","Variable "+inTk.getValue()+" not defined!");
+                    target.append(in,id);
+                }
+                default -> throw new CommandException(line,"Append","Expected a boolean/number/string/name | Got: "+idx.type());
+            }
+        }
     }
 }
