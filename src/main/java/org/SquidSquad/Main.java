@@ -22,8 +22,8 @@ public class Main {
         // we now testing the file reader
 
         // startup the scanner
-        print("Path to scrips (leave empty for default): ");
-        String response = scanner.nextLine();
+        //print("Path to scrips (leave empty for default): ");
+        String response = "";//scanner.nextLine();
         if (response != null) {
             if (!response.isEmpty()) {
                 fr = new FileReader(response);

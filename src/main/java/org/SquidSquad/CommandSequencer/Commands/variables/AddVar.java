@@ -3,6 +3,7 @@ package org.SquidSquad.CommandSequencer.Commands.variables;
 import org.SquidSquad.CommandSequencer.CommandException;
 import org.SquidSquad.CommandSequencer.Commands.Command;
 import org.SquidSquad.CommandSequencer.Commands.CommandType;
+import org.SquidSquad.CommandSequencer.Commands.controlFlow.Condition;
 import org.SquidSquad.CommandSequencer.variables.complex.DynFieldCord;
 import org.SquidSquad.CommandSequencer.variables.complex.DynFieldPos;
 import org.SquidSquad.CommandSequencer.variables.complex.DynJson;
@@ -57,14 +58,34 @@ public class AddVar extends Command {
                 if (value instanceof Boolean){
                     if (varName != null) newVar = new DynBoolean((boolean)value,varName);
                     else newVar = new DynBoolean((boolean)value);
+                } else if (value instanceof Condition){
+                    if (varName != null) newVar = new DynBoolean((Condition)value,varName);
+                    else newVar = new DynBoolean((Condition)value);
                 } else {
                     throw new CommandException(line, "AddVar", "Given value is not a json!"); // I think that its literally impossible for this to fire
                 }
             }
             case List -> {
                 if (value instanceof ArrayList<?>){
-                    if (varName != null) newVar = new DynList((ArrayList<Variable>)value,varName);
-                    else newVar = new DynList((ArrayList<Variable>)value);
+                    // we assume that we are given an array of objects that we convert into variables
+                    // the object can be any dyn variable or a String (which represents a variable ID)
+                    ArrayList<Variable> realValue = new ArrayList<>();
+                    for (Object item : (ArrayList<Object>)value){
+                        if (item instanceof String){
+                            Variable gotten = varManager.getVar((String)item);
+                            if (gotten == null) throw new CommandException(line,"AddVar","Variable "+item+" not defined!");
+                            realValue.add(gotten);
+                        } else if (item instanceof DynBoolean){
+                            realValue.add((Variable)item);
+                        } else if (item instanceof DynNumber){
+                            realValue.add((Variable)item);
+                        } else if (item instanceof DynString){
+                            realValue.add((Variable)item);
+                        }
+                        // skip any invalid value
+                    }
+                    if (varName != null) newVar = new DynList(realValue,varName);
+                    else newVar = new DynList(realValue);
                 } else {
                     throw new CommandException(line, "AddVar", "Given value is not a json!"); // I think that its literally impossible for this to fire
                 }

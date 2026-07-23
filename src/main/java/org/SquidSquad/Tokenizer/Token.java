@@ -46,6 +46,8 @@ public class Token {
             case LCbracket -> tokenType = "Left Curly Bracket";
             case RCbracket ->  tokenType = "Right Curly Bracket";
 
+            case Colon -> tokenType = "Color";
+
             // math ops
             case Add -> tokenType = "Add";
             case Sub -> tokenType = "Subtract";
@@ -69,15 +71,23 @@ public class Token {
             case Decrement ->  tokenType = "Decrement Number";
 
             // variable types
-            case Number -> tokenType = "Number";
-            case BoolDef -> tokenType = "Boolean";
-            case String -> tokenType = "String";
+            case NumberDef -> tokenType = "Number definition";
+            case BoolDef -> tokenType = "Boolean definition";
+            case StringDef -> tokenType = "String definition";
 
             case List -> tokenType = "List";
             case Json -> tokenType = "Json";
             case FieldCord -> tokenType = "Field Coordinate";
 
             case FieldPos -> tokenType = "Field Position";
+
+            // list/json Ops
+            case Get -> tokenType = "Get";
+            case Insert -> tokenType = "Insert";
+            case Append -> tokenType = "Append";
+
+            case Remove -> tokenType = "Remove";
+            case Set -> tokenType = "Set";
 
             // logical ops
             case Equals -> tokenType = "Equals";
@@ -88,6 +98,17 @@ public class Token {
             case And -> tokenType = "And";
             case Or -> tokenType = "Or";
             case Not -> tokenType = "Not";
+
+            // movement ops
+            case TurnTo -> tokenType = "Turn-to";
+            case GoTo -> tokenType = "Go-to";
+
+            case doBez -> tokenType = "Move bezier";
+            case followSpline -> tokenType = "Move spline";
+
+            case followSplineLinear -> tokenType = "Move spline linear";
+
+            case followSplineSpline -> tokenType = "Move spline spline";
 
             // funcs/loop/if
             case DefPath -> tokenType = "Define Path";
@@ -102,8 +123,10 @@ public class Token {
             case Clear -> tokenType = "Clear Telemetry";
 
             // literals
-            case Boolean -> tokenType = "Literal"; // variable value, etc.
+            case Boolean -> tokenType = "Boolean"; // variable value, etc.
             case Name -> tokenType = "Name"; // name of variable, or path func
+            case Number -> tokenType = "Number";
+            case String -> tokenType = "String";
 
             // random commands
             case RngFloat -> tokenType = "Random Float";

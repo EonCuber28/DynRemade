@@ -27,6 +27,10 @@ import org.SquidSquad.CommandSequencer.Commands.variables.Append;
 import org.SquidSquad.CommandSequencer.Commands.variables.Get;
 import org.SquidSquad.CommandSequencer.Commands.variables.Remove;
 import org.SquidSquad.CommandSequencer.variables.VariableTypes;
+import org.SquidSquad.CommandSequencer.variables.complex.DynList;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynBoolean;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynNumber;
+import org.SquidSquad.CommandSequencer.variables.primitives.DynString;
 import org.SquidSquad.Tokenizer.Token;
 import org.SquidSquad.Tokenizer.TokenTypes;
 
@@ -97,6 +101,7 @@ public class CommandConstructor {
             case MainPathFunc -> processMainPathFunc();
             case Run -> processRun();
             case End -> processEnd();
+            default -> throwError("Unexpected token: "+current.toString());
         }
     }
 
@@ -2163,12 +2168,242 @@ public class CommandConstructor {
                     }
                 }
             }
-            case FieldPos -> {}
-            case Number -> {}
-            case String -> {}
-            case BoolDef -> {}
-            case List -> {}
-            case Json -> {}
+            case FieldPos -> {
+                String name = "";
+                if (nextIsType(Name)){
+                    i++;
+                    name = (String)givenTokens[i].getValue();
+                } else {
+                    i++;
+                    throwError("Expected name | Got: "+givenTokens[i].type());
+                }
+
+                if (nextIsType(Lparenth,Name,Comma,Name,Comma,Name,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Name,Comma,Name,Comma,Number,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Name,Comma,Number,Comma,Name,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Number,Comma,Name,Comma,Name,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Name,Comma,Number,Comma,Number,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Number,Comma,Number,Comma,Name,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Number,Comma,Name,Comma,Number,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else if (nextIsType(Lparenth,Number,Comma,Number,Comma,Number,Rparenth)){
+                    i++;
+                    Token in1 = givenTokens[i+1];
+                    Token in2 = givenTokens[i+3];
+                    Token in3 = givenTokens[i+5];
+                    addCommand(new AddVar(in1.getLine(), name, VariableTypes.FieldPos, new Object[]{in1.getValue(),in2.getValue(),in3.getValue()}));
+                    i+=7;
+                }
+                else {
+                    if (nextIsType(Lparenth)){
+                        i++;
+                        if (nextIsType(Name)||nextIsType(Number)){
+                            i++;
+                            if (nextIsType(Comma)){
+                                i++;
+                                if (nextIsType(Name)||nextIsType(Number)){
+                                    i++;
+                                    if (nextIsType(Comma)){
+                                        i++;
+                                        if (nextIsType(Name)||nextIsType(Number)){
+                                            i++;
+                                            if (!nextIsType(Rparenth)){
+                                                i++;
+                                                throwError("Expected \")\" | Got: "+givenTokens[i].type());
+                                            }
+                                        } else {
+                                            i++;
+                                            throwError("Expected nane/number | Got: "+givenTokens[i].type());
+                                        }
+                                    } else {
+                                        i++;
+                                        throwError("Expected \",\" | Got: "+givenTokens[i].type());
+                                    }
+                                } else {
+                                    i++;
+                                    throwError("Expected name/number | Got: "+givenTokens[i].type());
+                                }
+                            } else {
+                                i++;
+                                throwError("Expected \",\" | Got: "+givenTokens[i].type());
+                            }
+                        } else {
+                            i++;
+                            throwError("Expected name/number | Got: "+givenTokens[i].type());
+                        }
+                    } else {
+                        i++;
+                        throwError("Expected \"(\" | Got: "+givenTokens[i].type());
+                    }
+                }
+            }
+            case NumberDef -> {
+                if (nextIsType(Name,Number)){
+                    i++;
+                    Token name = givenTokens[i];
+                    Token number = givenTokens[i+1];
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.Number, number.getValue()));
+                    i+=2;
+                } else if (nextIsType(Name)){
+                    i++;
+                    Token name = givenTokens[i];
+                    addCommand(new AddVar(name.getLine(), (String)name.getValue(), VariableTypes.Number, 0));
+                } else {
+                    if (nextIsType(Name)){
+                        i+=2;
+                        throwError("Expected number | Got: "+givenTokens[i].type());
+                    } else {
+                        i++;
+                        throwError("Expected name | Got: "+givenTokens[i].type());
+                    }
+                }
+            }
+            case StringDef -> {
+                if (nextIsType(Name,String)){
+                    i++;
+                    Token name = givenTokens[i];
+                    Token value = givenTokens[i+1];
+                    addCommand(new AddVar(getLine(), (String)name.getValue(), VariableTypes.String, value.getValue()));
+                } else if (nextIsType(Name)){
+                    i++;
+                    Token name = givenTokens[i];
+                    addCommand(new AddVar(getLine(), (String)name.getValue(), VariableTypes.String, ""));
+                } else {
+                    if (nextIsType(Name)){
+                        i++;
+                        throwError("Expected string | Got: "+givenTokens[i].type());
+                    } else {
+                        i++;
+                        throwError("Expected name | Got: "+givenTokens[i].type());
+                    }
+                }
+            }
+            case BoolDef -> {
+                if (nextIsType(Name,Lparenth)){
+                    i++;
+                    Token name = givenTokens[i];
+                    Condition con = processCondition();
+                    addCommand(new AddVar(getLine(), (String)name.getValue(), VariableTypes.Boolean, con));
+                    i++;
+                } else if (nextIsType(Name,Boolean)){
+                    i++;
+                    Token name = givenTokens[i];
+                    Token value = givenTokens[i+1];
+                    addCommand(new AddVar(getLine(), (String)name.getValue(), VariableTypes.Boolean, value.getValue()));
+                    i+=2;
+                } else if (nextIsType(Name)){
+                    i++;
+                    Token name = givenTokens[i];
+                    addCommand(new AddVar(getLine(), (String)name.getValue(), VariableTypes.Boolean, true));
+                    i++;
+                } else {
+                    if (nextIsType(Name)){
+                        i++;
+                        throwError("Expected true/false/condition | Got: "+givenTokens[i].type());
+                    } else {
+                        i++;
+                        throwError("Expected name | Got: "+givenTokens[i].type());
+                    }
+                }
+            }
+            case List -> {
+                if (nextIsType(Name,Lbracket)){
+                    i++;
+                    Token name = givenTokens[i];
+                    i++;
+                    ArrayList<Object> listVals = new ArrayList<>();
+                    while (!nextIsType(Rbracket)){
+                        i++;
+                        switch (givenTokens[i].type()){
+                            case Rbracket -> {} // skips the default condition and lets the loop end naturally
+                            case Boolean -> listVals.add(new DynBoolean((boolean)givenTokens[i].getValue()));
+                            case String -> listVals.add(new DynString((String)givenTokens[i].getValue()));
+                            case Number -> listVals.add(new DynNumber((double)givenTokens[i].getValue()));
+                            case Name -> listVals.add(givenTokens[i].getValue());
+                            default -> throwError("Expected boolean/string/number/name | Got: ");
+                        }
+                        if (nextIsType(Comma)){
+                            i++;
+                        } else if (nextIsType(Rbracket)) {
+                            i++;
+                            break;
+                        } else {
+                            i++;
+                            throwError("Expected \"]\"/\",\" | Got: "+givenTokens[i].type());
+                        }
+                    }
+                    i++;
+                    addCommand(new AddVar(getLine(),(String)name.getValue(),VariableTypes.List,listVals));
+                } else if (nextIsType(Name)){
+                    i++;
+                    Token name = givenTokens[i];
+                    addCommand(new AddVar(getLine(),(String)name.getValue(),VariableTypes.List,new ArrayList<Object>()));
+                    i++;
+                } else {
+                    if (nextIsType(Name)){
+                        i++;
+                        throwError("Expected \"[\" | Got: "+givenTokens[i].type());
+                    } else {
+                        i++;
+                        throwError("Expected name | Got: "+givenTokens[i].type());
+                    }
+                }
+            }
+            case Json -> {
+                if (nextIsType(Name,LCbracket)){
+                    
+                } else if (nextIsType(Name)){
+
+                }
+            }
         }
     }
     private void processRandomOp(){
@@ -2316,14 +2551,14 @@ public class CommandConstructor {
             case AddData -> {
                 if (nextIsType(Name)){
                     i++;
-                    Token name = givenTokens[i];
+                    Token name = givenTokens[i+1];
                     addCommand(new AddData(name.getLine(), (String)name.getValue()));
-                    i++;
+                    i+=2;
                 } else if (nextIsType(Number)||nextIsType(Boolean)||nextIsType(String)) {
                     i++;
-                    Token number = givenTokens[i];
+                    Token number = givenTokens[i+1];
                     addCommand(new AddData(number.getLine(), number.getValue()));
-                    i++;
+                    i+=2;
                 } else {
                     if (!(nextIsType(Name)||nextIsType(Number)||nextIsType(Boolean)||nextIsType(String))){
                         i++;
@@ -2334,12 +2569,10 @@ public class CommandConstructor {
             case Update -> {
                 i++;
                 addCommand(new Update(current.getLine()));
-                i++;
             }
             case Clear -> {
                 i++;
                 addCommand(new Clear(current.getLine()));
-                i++;
             }
         }
     }
@@ -2554,6 +2787,7 @@ public class CommandConstructor {
                             DynPath func = new DynPath(givenTokens[i].getLine());
                             funcIDmap.put((String)givenTokens[i].getValue(), func);
                             depthTracker.add(func);
+                            i+=2;
                         } else {
                             throwError("Cannot defined functions inside of functions!");
                         }
@@ -2576,6 +2810,7 @@ public class CommandConstructor {
                     Token tk = givenTokens[i];
                     Condition con = processCondition();
                     addCommand(new While(tk.getLine(),con));
+                    i++;
                 } else {
                     i++;
                     throwError("Expected boolean/condition | Got: "+givenTokens[i].type());

@@ -1,15 +1,25 @@
 package org.SquidSquad.CommandSequencer.variables.primitives;
 
+import org.SquidSquad.CommandSequencer.Commands.controlFlow.Condition;
 import org.SquidSquad.CommandSequencer.variables.Variable;
 import org.SquidSquad.CommandSequencer.variables.VariableTypes;
 
 public class DynBoolean extends Variable {
+    private Condition con = null;
+
     public DynBoolean(boolean state){
         super(VariableTypes.Boolean, state);
-
     }
     public DynBoolean(boolean state, String name){
         super(VariableTypes.Boolean,state,name);
+    }
+    public DynBoolean(Condition state, String name){
+        super(VariableTypes.Boolean, state, name);
+        con = state;
+    }
+    public DynBoolean(Condition state){
+        super(VariableTypes.Boolean, state);
+        con = state;
     }
 
     private void catchIncompatible(Variable in, String operation){
@@ -18,15 +28,20 @@ public class DynBoolean extends Variable {
         }
     }
 
+    private boolean getState(){
+        if (con == null) return (boolean)value;
+        else return con.getResult();
+    }
+
     // logic Ops
     @Override
     public boolean equals(Variable in){
         switch (in.getType()){
             case Boolean -> {
-                return ((boolean)in.getValue() == (boolean)value);
+                return ((boolean)in.getValue() == getState());
             }
             case String -> {
-                return String.valueOf(in.getValue()).equals(String.valueOf(value));
+                return String.valueOf(in.getValue()).equals(String.valueOf(getState()));
             }
         }
         return false;
@@ -34,16 +49,16 @@ public class DynBoolean extends Variable {
     @Override
     public boolean and(Variable in){
         catchIncompatible(in, "And");
-        return ((boolean)in.getValue() && (boolean)value);
+        return ((boolean)in.getValue() && getState());
     }
     @Override
     public boolean or(Variable in){
         catchIncompatible(in, "Or");
-        return ((boolean)in.getValue() || (boolean)value);
+        return ((boolean)in.getValue() || getState());
     }
     @Override
     public boolean not(){
-        return !(boolean)value;
+        return !getState();
     }
     // json/list shenanigans
     @Override
